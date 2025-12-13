@@ -138,7 +138,6 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .await?;
 
     // Read responses
-    message_count = 0;
     loop {
         match tokio::time::timeout(Duration::from_secs(15), client.next_message()).await {
             Ok(Some(message)) => match message {
@@ -146,9 +145,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                     println!("\n✓ Example 2 complete: Blocking hook executed\n");
                     break;
                 }
-                Ok(Message::Assistant { .. }) => {
-                    message_count += 1;
-                }
+                Ok(Message::Assistant { .. }) => {}
                 Ok(_) => {}
                 Err(e) => {
                     eprintln!("  Error: {e}");

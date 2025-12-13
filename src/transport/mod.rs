@@ -114,6 +114,8 @@ fn version_lt(v1: &str, v2: &str) -> bool {
     false
 }
 
+pub use subprocess::{PromptInput, SubprocessTransport};
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -128,5 +130,3 @@ mod tests {
         assert!(version_lt("1.9.0", "1.10.0"));
     }
 }
-
-pub use subprocess::{PromptInput, SubprocessTransport};

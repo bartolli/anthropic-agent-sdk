@@ -127,31 +127,26 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             }
             Message::User { message, .. } => {
                 // Tool results often come as User messages
-                if let Some(content) = message.content {
-                    match content {
-                        anthropic_agent_sdk::UserContent::Blocks(blocks) => {
-                            for block in blocks {
-                                if let anthropic_agent_sdk::ContentBlock::ToolResult {
-                                    content,
-                                    tool_use_id,
-                                    ..
-                                } = block
-                                {
-                                    println!("  [Tool result for {}]", tool_use_id);
-                                    if let Some(value) = content {
-                                        match value {
-                                            anthropic_agent_sdk::ContentValue::String(text) => {
-                                                println!("    => {}", text);
-                                            }
-                                            anthropic_agent_sdk::ContentValue::Blocks(b) => {
-                                                println!("    => {:?}", b);
-                                            }
-                                        }
+                if let Some(anthropic_agent_sdk::UserContent::Blocks(blocks)) = message.content {
+                    for block in blocks {
+                        if let anthropic_agent_sdk::ContentBlock::ToolResult {
+                            content,
+                            tool_use_id,
+                            ..
+                        } = block
+                        {
+                            println!("  [Tool result for {}]", tool_use_id);
+                            if let Some(value) = content {
+                                match value {
+                                    anthropic_agent_sdk::ContentValue::String(text) => {
+                                        println!("    => {}", text);
+                                    }
+                                    anthropic_agent_sdk::ContentValue::Blocks(b) => {
+                                        println!("    => {:?}", b);
                                     }
                                 }
                             }
                         }
-                        _ => {}
                     }
                 }
             }

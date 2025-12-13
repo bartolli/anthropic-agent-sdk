@@ -5,6 +5,27 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.67] - 2025-12-12
+
+### Added
+- Interactive TUI demo crate at `demos/tui-demo` with Goose-style UI
+- Spinner with cycling random thinking messages (updates every 2 seconds)
+- Styled prompts: green `>>` for user input, cyan `claude>` for responses
+- Tool use headers showing operation and file path
+- Markdown rendering with syntax highlighting via bat
+- REPL input with rustyline (history, multi-line, Ctrl+C/D handling)
+- Slash commands: `/help`, `/quit`, `/clear`, `/test-spinner`
+- Context usage visualization with colored dot progress indicators
+- Goose TUI analysis documentation at `docs/goose-tui-analysis.md`
+
+### Changed
+- Converted project to workspace with SDK at root and demos as members
+- Workspace resolver set to "2" for consistent dependency resolution
+
+### Fixed
+- Clippy error in `src/transport/mod.rs` (items after test module)
+- Clippy errors in `examples/mcp_integration.rs` (collapsible match, single match)
+
 ## [0.2.60] - 2025-12-07
 
 ### Added

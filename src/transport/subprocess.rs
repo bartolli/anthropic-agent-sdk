@@ -395,11 +395,12 @@ impl SubprocessTransport {
         }
 
         // Plugins (local paths)
+        // Uses --plugin-dir to load plugins from directories for this session
         if let Some(ref plugins) = self.options.plugins {
             for plugin in plugins {
                 match plugin {
                     crate::types::SdkPluginConfig::Local { path } => {
-                        cmd.arg("--plugin").arg(path);
+                        cmd.arg("--plugin-dir").arg(path);
                     }
                 }
             }

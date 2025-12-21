@@ -8,7 +8,7 @@
 
 use crate::config;
 use crate::thinking;
-use console::{style, Term};
+use console::{Term, style};
 use std::io::{self, IsTerminal, Write};
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::{Arc, Mutex};
@@ -65,7 +65,11 @@ pub fn display_session_info(session_id: Option<&str>) {
 
     if let Some(id) = session_id {
         println!();
-        println!("    {} {}", style("session id:").dim(), style(id).cyan().dim());
+        println!(
+            "    {} {}",
+            style("session id:").dim(),
+            style(id).cyan().dim()
+        );
     } else {
         println!();
     }
@@ -119,10 +123,7 @@ pub fn display_cost(cost: Option<f64>) {
     }
 
     if let Some(cost) = cost {
-        println!(
-            "  {}",
-            style(format!("[cost: ${:.4}]", cost)).dim()
-        );
+        println!("  {}", style(format!("[cost: ${:.4}]", cost)).dim());
     }
 }
 
@@ -253,15 +254,24 @@ pub fn display_help() {
     println!("{}", style("Available Commands:").bold());
     println!("  {}  - Show this help", style("/help").cyan());
     println!("  {}  - Clear the screen", style("/clear").cyan());
-    println!("  {}  - Test spinner animation (3s)", style("/test-spinner").cyan());
+    println!(
+        "  {}  - Test spinner animation (3s)",
+        style("/test-spinner").cyan()
+    );
     println!("  {}  - Exit the application", style("/quit").cyan());
     println!("  {}   - Exit the application", style("quit").cyan());
     println!("  {}   - Exit the application", style("exit").cyan());
     println!();
     println!("{}", style("Keyboard Shortcuts:").bold());
-    println!("  {}    - Cancel current line or exit", style("Ctrl+C").cyan());
+    println!(
+        "  {}    - Cancel current line or exit",
+        style("Ctrl+C").cyan()
+    );
     println!("  {}    - Exit the application", style("Ctrl+D").cyan());
-    println!("  {}    - Insert newline (multi-line input)", style("Ctrl+J").cyan());
+    println!(
+        "  {}    - Insert newline (multi-line input)",
+        style("Ctrl+J").cyan()
+    );
     println!();
 }
 
@@ -273,7 +283,5 @@ pub fn clear_screen() {
 /// Get terminal width for text wrapping
 #[allow(dead_code)]
 pub fn terminal_width() -> Option<usize> {
-    Term::stdout()
-        .size_checked()
-        .map(|(_h, w)| w as usize)
+    Term::stdout().size_checked().map(|(_h, w)| w as usize)
 }

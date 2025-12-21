@@ -185,7 +185,15 @@ impl SubprocessTransport {
                         cmd.arg("--append-system-prompt").arg(append);
                     }
                 }
+                SystemPrompt::File(path) => {
+                    cmd.arg("--system-prompt-file").arg(path);
+                }
             }
+        }
+
+        // Append system prompt (additional text to append to any system prompt)
+        if let Some(ref append) = self.options.append_system_prompt {
+            cmd.arg("--append-system-prompt").arg(append);
         }
 
         // Allowed tools

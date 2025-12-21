@@ -55,6 +55,10 @@ pub use rmcp::model::{
     CallToolResult,
     // Content types
     Content,
+    CustomNotification,
+    // Custom protocol extensions (rmcp 0.12.0+)
+    CustomRequest,
+    CustomResult,
     // Server info and capabilities
     ServerCapabilities,
     ServerInfo,
@@ -64,6 +68,9 @@ pub use rmcp::model::{
 // Re-export handler types
 pub use rmcp::handler::server::tool::ToolRouter;
 pub use rmcp::handler::server::wrapper::{Json, Parameters};
+
+// Re-export service types for handler signatures
+pub use rmcp::service::{RequestContext, RoleServer};
 
 // Re-export schemars for schema derivation
 pub use rmcp::schemars;

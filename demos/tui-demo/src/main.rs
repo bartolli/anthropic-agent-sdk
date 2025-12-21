@@ -30,9 +30,8 @@ fn history_path() -> PathBuf {
 
 /// Extract a useful detail from tool input for display
 fn extract_tool_detail(tool_name: &str, input: &serde_json::Value) -> Option<String> {
-    let get_str = |key: &str| -> Option<&str> {
-        input.get(key).and_then(serde_json::Value::as_str)
-    };
+    let get_str =
+        |key: &str| -> Option<&str> { input.get(key).and_then(serde_json::Value::as_str) };
 
     match tool_name {
         "Read" | "Write" | "Edit" => get_str("file_path").map(shorten_path),
@@ -61,7 +60,7 @@ fn shorten_path(path: &str) -> String {
         path.to_string()
     } else {
         // Keep last 2-3 components
-        format!(".../{}", parts[parts.len()-2..].join("/"))
+        format!(".../{}", parts[parts.len() - 2..].join("/"))
     }
 }
 
@@ -111,9 +110,8 @@ async fn main() -> anyhow::Result<()> {
     // Initialize tracing
     // Default: show info for demo, warn for deps (filters rustyline keystroke noise)
     // Override with RUST_LOG env var for more detail
-    let filter = tracing_subscriber::EnvFilter::try_from_default_env().unwrap_or_else(|_| {
-        "claude_tui_demo=info,rustyline=info,warn".parse().unwrap()
-    });
+    let filter = tracing_subscriber::EnvFilter::try_from_default_env()
+        .unwrap_or_else(|_| "claude_tui_demo=info,rustyline=info,warn".parse().unwrap());
     tracing_subscriber::fmt().with_env_filter(filter).init();
 
     // Display greeting
@@ -167,9 +165,9 @@ async fn main() -> anyhow::Result<()> {
                 let start_time = Instant::now();
 
                 // Read and display response
-                let mut first_text = true;   // Track first text output for claude> prefix
+                let mut first_text = true; // Track first text output for claude> prefix
                 let mut after_tools = false; // Track tool→text transition for spacing
-                let mut had_text = false;    // Track text→tool transition for newline
+                let mut had_text = false; // Track text→tool transition for newline
 
                 while let Some(message) = client.next_message().await {
                     match message {
@@ -216,7 +214,10 @@ async fn main() -> anyhow::Result<()> {
                                         }
                                         ContentBlock::Thinking { thinking, .. } => {
                                             // Could display thinking if verbose mode
-                                            tracing::debug!("Thinking: {}...", &thinking[..thinking.len().min(50)]);
+                                            tracing::debug!(
+                                                "Thinking: {}...",
+                                                &thinking[..thinking.len().min(50)]
+                                            );
                                         }
                                         _ => {
                                             // Other block types
@@ -224,10 +225,7 @@ async fn main() -> anyhow::Result<()> {
                                     }
                                 }
                             }
-                            Message::Result {
-                                total_cost_usd,
-                                ..
-                            } => {
+                            Message::Result { total_cost_usd, .. } => {
                                 // Ensure spinner is hidden before result
                                 output::hide_thinking();
 

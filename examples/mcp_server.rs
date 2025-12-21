@@ -11,11 +11,15 @@
 #[cfg(feature = "rmcp")]
 mod server {
     use anthropic_agent_sdk::mcp::{
-        Parameters, ServerCapabilities, ServerHandler, ServerInfo, ToolRouter, tool, tool_handler,
-        tool_router,
+        CustomRequest, CustomResult, Parameters, RequestContext, RoleServer, ServerCapabilities,
+        ServerHandler, ServerInfo, ToolRouter, tool, tool_handler, tool_router,
     };
+    use chrono::Utc;
+    use rmcp::ErrorData as McpError;
+    use rmcp::model::ErrorCode;
     use schemars::JsonSchema;
     use serde::Deserialize;
+    use serde_json::json;
     use std::sync::Arc;
     use tokio::sync::Mutex;
 
@@ -140,10 +144,54 @@ mod server {
         fn get_info(&self) -> ServerInfo {
             ServerInfo {
                 instructions: Some(
-                    "A demo MCP server with calculator, weather, and notes tools.".into(),
+                    "A demo MCP server with calculator, weather, notes tools, and custom protocol extensions.".into(),
                 ),
                 capabilities: ServerCapabilities::builder().enable_tools().build(),
                 ..Default::default()
+            }
+        }
+
+        /// Handle custom protocol requests (rmcp 0.12.0+)
+        ///
+        /// This demonstrates extending MCP with custom methods beyond the standard
+        /// tools/resources/prompts. Useful for server-specific functionality like
+        /// health checks, statistics, or custom operations.
+        async fn on_custom_request(
+            &self,
+            request: CustomRequest,
+            _context: RequestContext<RoleServer>,
+        ) -> Result<CustomResult, McpError> {
+            match request.method.as_str() {
+                // Simple ping/pong for health checks
+                "demo/ping" => Ok(CustomResult::new(json!({
+                    "pong": true,
+                    "timestamp": Utc::now().to_rfc3339()
+                }))),
+
+                // Get server statistics
+                "demo/stats" => {
+                    let notes = self.notes.lock().await;
+                    Ok(CustomResult::new(json!({
+                        "note_count": notes.len(),
+                        "server_name": "demo-mcp-server",
+                        "version": "1.0.0"
+                    })))
+                }
+
+                // Echo back params for testing
+                "demo/echo" => {
+                    let params = request.params.unwrap_or(json!(null));
+                    Ok(CustomResult::new(json!({
+                        "echoed": params
+                    })))
+                }
+
+                // Unknown method
+                _ => Err(McpError::new(
+                    ErrorCode::METHOD_NOT_FOUND,
+                    format!("Unknown custom method: {}", request.method),
+                    None,
+                )),
             }
         }
     }
@@ -175,6 +223,43 @@ mod server {
             println!("    └─ Error: {}", result);
         } else {
             println!("    └─ {}", result);
+        }
+    }
+
+    // ========================================================================
+    // Custom Request Handler - Standalone Demo Version
+    // ========================================================================
+
+    /// Simulate custom request handling for demo purposes.
+    ///
+    /// In production, `on_custom_request` is called by rmcp's service layer with a
+    /// `RequestContext` provided automatically. For this demo, we simulate the same
+    /// logic directly.
+    async fn demo_custom_request(
+        server: &DemoServer,
+        method: &str,
+        params: Option<serde_json::Value>,
+    ) -> Result<serde_json::Value, String> {
+        match method {
+            "demo/ping" => Ok(json!({
+                "pong": true,
+                "timestamp": Utc::now().to_rfc3339()
+            })),
+
+            "demo/stats" => {
+                let notes = server.notes.lock().await;
+                Ok(json!({
+                    "note_count": notes.len(),
+                    "server_name": "demo-mcp-server",
+                    "version": "1.0.0"
+                }))
+            }
+
+            "demo/echo" => Ok(json!({
+                "echoed": params.unwrap_or(json!(null))
+            })),
+
+            _ => Err(format!("Method not found: {}", method)),
         }
     }
 
@@ -300,6 +385,67 @@ mod server {
             println!("    │ {}", line);
         }
 
+        // Custom protocol extensions demo (rmcp 0.12.0+)
+        // Run BEFORE clear_notes() to show stateful integration works
+        print_separator("Custom Protocol Extensions (rmcp 0.12.0+)");
+        println!();
+        println!("  These extend MCP beyond standard tools/resources/prompts.");
+        println!("  Implementation: ServerHandler::on_custom_request()");
+        println!();
+
+        // demo/ping - health check
+        match demo_custom_request(&server, "demo/ping", None).await {
+            Ok(value) => {
+                println!("  ✓ demo/ping");
+                println!(
+                    "    └─ pong: {}, timestamp: {}",
+                    value["pong"],
+                    value["timestamp"].as_str().unwrap_or("?")
+                );
+            }
+            Err(e) => print_call("demo/ping", &e, true),
+        }
+
+        // demo/stats - server statistics
+        match demo_custom_request(&server, "demo/stats", None).await {
+            Ok(value) => {
+                println!("  ✓ demo/stats");
+                println!(
+                    "    └─ note_count: {}, server: {} v{}",
+                    value["note_count"],
+                    value["server_name"].as_str().unwrap_or("?"),
+                    value["version"].as_str().unwrap_or("?")
+                );
+            }
+            Err(e) => print_call("demo/stats", &e, true),
+        }
+
+        // demo/echo - echo params back
+        match demo_custom_request(
+            &server,
+            "demo/echo",
+            Some(json!({"message": "Hello, MCP!"})),
+        )
+        .await
+        {
+            Ok(value) => {
+                println!("  ✓ demo/echo({{\"message\": \"Hello, MCP!\"}})");
+                println!("    └─ echoed: {}", value["echoed"]);
+            }
+            Err(e) => print_call("demo/echo", &e, true),
+        }
+
+        // Unknown method - error case
+        match demo_custom_request(&server, "demo/unknown", None).await {
+            Ok(_) => print_call("demo/unknown", "Unexpected success", true),
+            Err(e) => {
+                println!("  ✓ demo/unknown (expected error)");
+                println!("    └─ {}", e);
+            }
+        }
+
+        // Clean up notes after demo
+        println!();
         let result = server.clear_notes().await;
         print_call("clear_notes()", &result, false);
 
@@ -308,6 +454,7 @@ mod server {
         println!("║                     Demo Complete                        ║");
         println!("╠══════════════════════════════════════════════════════════╣");
         println!("║  To use with Claude, see: mcp_integration.rs             ║");
+        println!("║  Custom protocol: on_custom_request() in ServerHandler   ║");
         println!("╚══════════════════════════════════════════════════════════╝");
         println!();
 
@@ -334,9 +481,12 @@ mod server {
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     use std::io::IsTerminal;
 
+    // Check for --demo flag to force demo mode
+    let force_demo = std::env::args().any(|arg| arg == "--demo");
+
     // When spawned by Claude (stdin not a terminal), serve MCP protocol
-    // When run interactively (stdin is terminal), show demo
-    if std::io::stdin().is_terminal() {
+    // When run interactively (stdin is terminal) or with --demo, show demo
+    if force_demo || std::io::stdin().is_terminal() {
         server::run_demo().await
     } else {
         server::run_stdio_server().await

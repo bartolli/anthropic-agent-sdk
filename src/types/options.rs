@@ -34,6 +34,8 @@ pub enum SystemPrompt {
     String(String),
     /// Preset-based system prompt
     Preset(SystemPromptPreset),
+    /// Load system prompt from a file (uses `--system-prompt-file` CLI flag)
+    File(PathBuf),
 }
 
 // Implement conversions for SystemPrompt
@@ -52,6 +54,20 @@ impl From<&str> for SystemPrompt {
 impl From<SystemPromptPreset> for SystemPrompt {
     fn from(preset: SystemPromptPreset) -> Self {
         SystemPrompt::Preset(preset)
+    }
+}
+
+impl From<PathBuf> for SystemPrompt {
+    fn from(path: PathBuf) -> Self {
+        SystemPrompt::File(path)
+    }
+}
+
+impl SystemPrompt {
+    /// Create a file-based system prompt
+    #[must_use]
+    pub fn from_file(path: impl Into<PathBuf>) -> Self {
+        SystemPrompt::File(path.into())
     }
 }
 
@@ -280,6 +296,10 @@ pub struct ClaudeAgentOptions {
     /// System prompt configuration
     #[builder(default, setter(strip_option, into))]
     pub system_prompt: Option<SystemPrompt>,
+
+    /// Additional text to append to the system prompt (uses `--append-system-prompt` CLI flag)
+    #[builder(default, setter(strip_option, into))]
+    pub append_system_prompt: Option<String>,
 
     /// MCP server configurations
     #[builder(default)]

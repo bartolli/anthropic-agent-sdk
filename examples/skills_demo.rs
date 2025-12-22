@@ -9,7 +9,7 @@
 //! - Project: `.claude/skills/*/SKILL.md`
 //! - User: `~/.claude/skills/*/SKILL.md`
 //!
-//! Run with: cargo run --example skills_demo
+//! Run with: cargo run --example `skills_demo`
 
 use anthropic_agent_sdk::{
     ClaudeAgentOptions, ClaudeSDKClient, ContentBlock, Message, SettingSource,
@@ -63,7 +63,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                 Message::Assistant { message, .. } => {
                     for block in &message.content {
                         if let ContentBlock::Text { text } = block {
-                            println!("Claude: {}\n", text);
+                            println!("Claude: {text}\n");
                         }
                     }
                 }

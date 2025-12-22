@@ -1,9 +1,9 @@
-//! Example demonstrating the new convenience methods in ClaudeSDKClient
+//! Example demonstrating the new convenience methods in `ClaudeSDKClient`
 //!
 //! This example shows how to use:
-//! - receive_response() - Auto-terminating stream for single queries
-//! - is_connected() - Check connection status
-//! - get_session_id() - Retrieve the session ID after completion
+//! - `receive_response()` - Auto-terminating stream for single queries
+//! - `is_connected()` - Check connection status
+//! - `get_session_id()` - Retrieve the session ID after completion
 
 use anthropic_agent_sdk::{ClaudeAgentOptions, ClaudeSDKClient, ContentBlock, Message};
 use futures::StreamExt;
@@ -33,7 +33,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                 Message::Assistant { message, .. } => {
                     // Print assistant responses
                     if let Some(ContentBlock::Text { text }) = message.content.first() {
-                        println!("  Assistant: {}", text);
+                        println!("  Assistant: {text}");
                     }
                 }
                 Message::Result {
@@ -43,9 +43,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                     ..
                 } => {
                     println!("\n✓ Query completed!");
-                    println!("  • Session ID: {}", session_id);
-                    println!("  • Duration: {}ms", duration_ms);
-                    println!("  • Turns: {}", num_turns);
+                    println!("  • Session ID: {session_id}");
+                    println!("  • Duration: {duration_ms}ms");
+                    println!("  • Turns: {num_turns}");
                 }
                 _ => {}
             }
@@ -55,7 +55,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     // Get session ID after completion
     if let Some(session_id) = client.get_session_id() {
-        println!("\n✓ Retrieved session ID: {}", session_id);
+        println!("\n✓ Retrieved session ID: {session_id}");
     }
 
     // Check connection status before closing

@@ -1,12 +1,12 @@
 //! Example demonstrating the new Result message fields
 //!
 //! This example shows how to access:
-//! - model_usage: Per-model token usage and cost breakdown
-//! - permission_denials: Tools that were denied by the permission system
-//! - structured_output: JSON output when using --json-schema
+//! - `model_usage`: Per-model token usage and cost breakdown
+//! - `permission_denials`: Tools that were denied by the permission system
+//! - `structured_output`: JSON output when using --json-schema
 //! - errors: Error messages from failed operations
 //!
-//! Run with: cargo run --example result_fields_demo
+//! Run with: cargo run --example `result_fields_demo`
 
 use anthropic_agent_sdk::{ClaudeAgentOptions, ClaudeSDKClient, ContentBlock, Message};
 use futures::StreamExt;
@@ -35,7 +35,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             Message::Assistant { message, .. } => {
                 for block in &message.content {
                     if let ContentBlock::Text { text } = block {
-                        println!("Claude: {}", text);
+                        println!("Claude: {text}");
                     }
                 }
             }
@@ -52,20 +52,22 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                 ..
             } => {
                 println!("\n--- Result Message Fields ---");
-                println!("Subtype: {}", subtype);
-                println!("Session ID: {}", session_id);
-                println!("Duration: {}ms", duration_ms);
-                println!("Turns: {}", num_turns);
+                println!("Subtype: {subtype}");
+                println!("Session ID: {session_id}");
+                println!("Duration: {duration_ms}ms");
+                println!("Turns: {num_turns}");
 
                 if let Some(cost) = total_cost_usd {
-                    println!("Total Cost: ${:.6}", cost);
+                    println!("Total Cost: ${cost:.6}");
                 }
 
                 // Display model_usage (per-model token breakdown)
-                if !model_usage.is_empty() {
+                if model_usage.is_empty() {
+                    println!("\n📊 Model Usage: (none reported)");
+                } else {
                     println!("\n📊 Model Usage (per model):");
                     for (model_id, usage) in &model_usage {
-                        println!("  Model: {}", model_id);
+                        println!("  Model: {model_id}");
                         println!("    Input tokens: {}", usage.input_tokens);
                         println!("    Output tokens: {}", usage.output_tokens);
                         println!("    Cache read tokens: {}", usage.cache_read_input_tokens);
@@ -80,38 +82,36 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                             println!("    Web searches: {}", usage.web_search_requests);
                         }
                     }
-                } else {
-                    println!("\n📊 Model Usage: (none reported)");
                 }
 
                 // Display permission_denials
-                if !permission_denials.is_empty() {
+                if permission_denials.is_empty() {
+                    println!("\n🚫 Permission Denials: (none)");
+                } else {
                     println!("\n🚫 Permission Denials:");
                     for denial in &permission_denials {
                         println!("  Tool: {}", denial.tool_name);
                         println!("    Use ID: {}", denial.tool_use_id);
                         println!("    Input: {}", denial.tool_input);
                     }
-                } else {
-                    println!("\n🚫 Permission Denials: (none)");
                 }
 
                 // Display structured_output (if outputFormat was used)
                 if let Some(output) = &structured_output {
-                    println!("\n📋 Structured Output:");
+                    println!("\nStructured Output:");
                     println!("  {}", serde_json::to_string_pretty(output)?);
                 } else {
-                    println!("\n📋 Structured Output: (none - use --json-schema to enable)");
+                    println!("\nStructured Output: (none - use --json-schema to enable)");
                 }
 
                 // Display errors
-                if !errors.is_empty() {
-                    println!("\n❌ Errors:");
-                    for error in &errors {
-                        println!("  - {}", error);
-                    }
+                if errors.is_empty() {
+                    println!("\nErrors: (none)");
                 } else {
-                    println!("\n❌ Errors: (none)");
+                    println!("\nErrors:");
+                    for error in &errors {
+                        println!("  ✗ {error}");
+                    }
                 }
 
                 break;

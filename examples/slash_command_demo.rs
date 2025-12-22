@@ -9,7 +9,7 @@
 //! - Project: `.claude/commands/*.md`
 //! - User: `~/.claude/commands/*.md`
 //!
-//! Run with: cargo run --example slash_command_demo
+//! Run with: cargo run --example `slash_command_demo`
 
 use anthropic_agent_sdk::{
     ClaudeAgentOptions, ClaudeSDKClient, ContentBlock, Message, SettingSource,
@@ -96,7 +96,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             println!("---------------------------");
 
             let command_msg = format!("/{} Hello SDK!", test_cmd.name);
-            println!("Sending: {}\n", command_msg);
+            println!("Sending: {command_msg}\n");
 
             client.send_message(&command_msg).await?;
 
@@ -112,7 +112,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                                 } else {
                                     text.clone()
                                 };
-                                println!("Response:\n{}\n", preview);
+                                println!("Response:\n{preview}\n");
                             }
                         }
                     }

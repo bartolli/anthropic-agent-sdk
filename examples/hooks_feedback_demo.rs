@@ -6,7 +6,7 @@
 //! - Warn about operations (exit 1)
 //! - Block operations (exit 2)
 //!
-//! The demo uses a PreToolUse hook on Read that limits line counts:
+//! The demo uses a `PreToolUse` hook on Read that limits line counts:
 //! - ≤400 lines: allowed silently
 //! - 401-600 lines: allowed with warning
 //! - >600 lines: blocked
@@ -96,19 +96,19 @@ async fn process_response(client: &mut ClaudeSDKClient, test_name: &str) {
                     match block {
                         anthropic_agent_sdk::ContentBlock::ToolUse { name, input, .. } => {
                             saw_tool_use = true;
-                            let input_preview = format!("{}", input);
+                            let input_preview = format!("{input}");
                             let preview = if input_preview.len() > 100 {
                                 format!("{}...", &input_preview[..100])
                             } else {
                                 input_preview
                             };
-                            println!("  [Tool Use] {}: {}", name, preview);
+                            println!("  [Tool Use] {name}: {preview}");
                         }
                         anthropic_agent_sdk::ContentBlock::Text { text } => {
                             // Only show non-empty text
                             let trimmed = text.trim();
                             if !trimmed.is_empty() {
-                                println!("  [Claude] {}", trimmed);
+                                println!("  [Claude] {trimmed}");
                             }
                         }
                         _ => {}
@@ -134,7 +134,7 @@ async fn process_response(client: &mut ClaudeSDKClient, test_name: &str) {
                             };
 
                             // Check if content mentions hook or block
-                            let content_str = format!("{:?}", content);
+                            let content_str = format!("{content:?}");
                             let is_hook_related = content_str.contains("blocked")
                                 || content_str.contains("hook")
                                 || content_str.contains("WARN")
@@ -142,8 +142,7 @@ async fn process_response(client: &mut ClaudeSDKClient, test_name: &str) {
 
                             if is_hook_related || is_error.unwrap_or(false) {
                                 println!(
-                                    "  [Tool Result {}] {} - Hook feedback detected!",
-                                    status, tool_use_id
+                                    "  [Tool Result {status}] {tool_use_id} - Hook feedback detected!"
                                 );
                                 // Show the hook message
                                 let preview = if content_str.len() > 300 {
@@ -151,9 +150,9 @@ async fn process_response(client: &mut ClaudeSDKClient, test_name: &str) {
                                 } else {
                                     content_str
                                 };
-                                println!("    Content: {}", preview);
+                                println!("    Content: {preview}");
                             } else {
-                                println!("  [Tool Result {}] {}", status, tool_use_id);
+                                println!("  [Tool Result {status}] {tool_use_id}");
                             }
                         }
                     }
@@ -162,20 +161,20 @@ async fn process_response(client: &mut ClaudeSDKClient, test_name: &str) {
             Ok(Message::System { subtype, data }) => {
                 // Check for hook-related system messages
                 if subtype.contains("hook") || subtype.contains("error") {
-                    println!("  [System:{}] {:?}", subtype, data);
+                    println!("  [System:{subtype}] {data:?}");
                 }
             }
             Ok(Message::Result { .. }) => {
-                println!("\n  {} Summary:", test_name);
-                println!("    Tool use attempted: {}", saw_tool_use);
-                println!("    Error encountered: {}", saw_error);
+                println!("\n  {test_name} Summary:");
+                println!("    Tool use attempted: {saw_tool_use}");
+                println!("    Error encountered: {saw_error}");
                 break;
             }
             Ok(_) => {
                 // Ignore other message types (StreamEvent, etc.)
             }
             Err(e) => {
-                println!("  [Error] {}", e);
+                println!("  [Error] {e}");
                 saw_error = true;
             }
         }

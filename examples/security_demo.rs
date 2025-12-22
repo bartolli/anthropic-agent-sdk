@@ -4,7 +4,7 @@
 //! - Dangerous environment variable blocking (strict enforcement)
 //! - CLI argument allowlist enforcement (strict enforcement)
 //!
-//! Run with: cargo run --example security_demo
+//! Run with: cargo run --example `security_demo`
 
 use anthropic_agent_sdk::{ClaudeAgentOptions, ClaudeSDKClient};
 
@@ -46,7 +46,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             println!("  ERROR: Should have been rejected!");
         }
         Err(e) => {
-            println!("  REJECTED: {}", e);
+            println!("  REJECTED: {e}");
             println!("  Security: Dangerous env vars cause connection failure");
         }
     }
@@ -74,7 +74,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             client.close().await?;
         }
         Err(e) => {
-            println!("  Connection failed (unrelated to env vars): {}", e);
+            println!("  Connection failed (unrelated to env vars): {e}");
         }
     }
     println!();
@@ -104,7 +104,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             println!("  ERROR: Should have been rejected!");
         }
         Err(e) => {
-            println!("  REJECTED: {}", e);
+            println!("  REJECTED: {e}");
             println!("  Security: Disallowed flags cause connection failure");
         }
     }
@@ -133,7 +133,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             client.close().await?;
         }
         Err(e) => {
-            println!("  Connection failed (unrelated to flags): {}", e);
+            println!("  Connection failed (unrelated to flags): {e}");
         }
     }
     println!();

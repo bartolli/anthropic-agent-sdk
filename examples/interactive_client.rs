@@ -3,7 +3,7 @@
 //! This example demonstrates a true interactive conversation with Claude.
 //! Type your messages and press Enter to send. Type 'quit' or 'exit' to end.
 //!
-//! Run with: cargo run --example interactive_client
+//! Run with: cargo run --example `interactive_client`
 
 use anthropic_agent_sdk::{ClaudeAgentOptions, ClaudeSDKClient, ContentBlock, Message};
 use std::io::{self, BufRead, Write};
@@ -59,7 +59,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                     Message::Assistant { message, .. } => {
                         for block in &message.content {
                             if let ContentBlock::Text { text } = block {
-                                print!("{}", text);
+                                print!("{text}");
                                 stdout.flush()?;
                             }
                         }
@@ -67,7 +67,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                     Message::Result { total_cost_usd, .. } => {
                         println!();
                         if let Some(cost) = total_cost_usd {
-                            println!("  [cost: ${:.4}]", cost);
+                            println!("  [cost: ${cost:.4}]");
                         }
                         println!();
                         break;
@@ -75,7 +75,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                     _ => {}
                 },
                 Err(e) => {
-                    eprintln!("\nError: {}", e);
+                    eprintln!("\nError: {e}");
                     break;
                 }
             }

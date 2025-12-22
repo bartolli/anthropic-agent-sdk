@@ -1,10 +1,10 @@
 //! Test integrated hooks - hooks fire automatically via options.hooks
 //!
 //! This example demonstrates hooks that fire automatically when messages flow
-//! through the client, without needing to manually call process_message().
+//! through the client, without needing to manually call `process_message()`.
 //!
-//! Run with: cargo run --example integrated_hooks_test
-//! Run with debug: RUST_LOG=debug cargo run --example integrated_hooks_test
+//! Run with: cargo run --example `integrated_hooks_test`
+//! Run with debug: `RUST_LOG=debug` cargo run --example `integrated_hooks_test`
 
 use anthropic_agent_sdk::ClaudeSDKClient;
 use anthropic_agent_sdk::hooks::{HookManager, HookMatcherBuilder};
@@ -101,7 +101,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             let tool = tool_name.unwrap_or_else(|| "unknown".to_string());
             let tool_input = input
                 .get("tool_input")
-                .map(|v| v.to_string())
+                .map(std::string::ToString::to_string)
                 .unwrap_or_default();
             let preview: String = if tool_input.chars().count() > 50 {
                 tool_input.chars().take(50).collect::<String>() + "..."

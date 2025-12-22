@@ -1,13 +1,13 @@
-//! Test example for SubagentStart and SubagentStop hooks
+//! Test example for `SubagentStart` and `SubagentStop` hooks
 //!
 //! This example demonstrates:
-//! - Registering hooks for SubagentStart and SubagentStop events
+//! - Registering hooks for `SubagentStart` and `SubagentStop` events
 //! - Tracking subagent lifecycle (similar to codanna's subagent-stop.js)
-//! - Using process_message to invoke hooks from the message stream
+//! - Using `process_message` to invoke hooks from the message stream
 //!
-//! Run with: cargo run --example hook_subagent_test
-//! Run with debug: RUST_LOG=debug cargo run --example hook_subagent_test
-//! Run with trace: RUST_LOG=trace cargo run --example hook_subagent_test
+//! Run with: cargo run --example `hook_subagent_test`
+//! Run with debug: `RUST_LOG=debug` cargo run --example `hook_subagent_test`
+//! Run with trace: `RUST_LOG=trace` cargo run --example `hook_subagent_test`
 
 use anthropic_agent_sdk::ClaudeSDKClient;
 use anthropic_agent_sdk::hooks::{HookManager, HookMatcherBuilder};

@@ -160,12 +160,8 @@ pub fn save_history(
 }
 
 /// Load history from a file
-pub fn load_history(
-    editor: &mut Editor<InputHelper, DefaultHistory>,
-    path: &std::path::Path,
-) -> anyhow::Result<()> {
+pub fn load_history(editor: &mut Editor<InputHelper, DefaultHistory>, path: &std::path::Path) {
     if path.exists() {
         let _ = editor.load_history(path); // Ignore errors on load
     }
-    Ok(())
 }

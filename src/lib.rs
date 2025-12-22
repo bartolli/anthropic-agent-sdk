@@ -320,7 +320,7 @@ pub use types::{
     AgentDefinition, CanUseToolCallback, ClaudeAgentOptions, ClaudeAgentOptionsBuilder,
     ContentBlock, ContentValue, HookContext, HookDecision, HookEvent, HookMatcher, HookOutput,
     McpHttpServerConfig, McpServerConfig, McpServers, McpSseServerConfig, McpStdioServerConfig,
-    Message, PermissionBehavior, PermissionMode, PermissionRequest, PermissionResult,
+    Message, OutputFormat, PermissionBehavior, PermissionMode, PermissionRequest, PermissionResult,
     PermissionResultAllow, PermissionResultDeny, PermissionRuleValue, PermissionUpdate,
     PermissionUpdateDestination, RequestId, SdkMcpServerConfig, SessionId, SettingSource,
     SystemPrompt, SystemPromptPreset, ToolName, ToolPermissionContext, UsageData, UsageLimit,

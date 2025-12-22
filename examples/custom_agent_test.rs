@@ -1,12 +1,12 @@
-//! Test custom AgentDefinition - define and invoke custom agents
+//! Test custom `AgentDefinition` - define and invoke custom agents
 //!
 //! This example demonstrates:
 //! - Defining custom agents via ClaudeAgentOptions.agents
-//! - Invoking custom agents via the Task tool with subagent_type
+//! - Invoking custom agents via the Task tool with `subagent_type`
 //! - Tracking custom agent lifecycle with hooks
 //!
-//! Run with: cargo run --example custom_agent_test
-//! Run with debug: RUST_LOG=debug cargo run --example custom_agent_test
+//! Run with: cargo run --example `custom_agent_test`
+//! Run with debug: `RUST_LOG=debug` cargo run --example `custom_agent_test`
 
 use anthropic_agent_sdk::ClaudeSDKClient;
 use anthropic_agent_sdk::hooks::{HookManager, HookMatcherBuilder};

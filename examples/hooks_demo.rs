@@ -9,7 +9,7 @@
 //! - Add custom logging or auditing
 //! - Inject custom behavior at specific points
 //!
-//! Run with: cargo run --example hooks_demo
+//! Run with: cargo run --example `hooks_demo`
 
 use anthropic_agent_sdk::ClaudeSDKClient;
 use anthropic_agent_sdk::hooks::HookManager;

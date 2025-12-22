@@ -3,7 +3,7 @@
 //! Demonstrates safe UTF-8 truncation to prevent panics when handling
 //! strings containing emoji or multi-byte characters.
 //!
-//! Run with: cargo run --example unicode_safety_demo
+//! Run with: cargo run --example `unicode_safety_demo`
 
 use anthropic_agent_sdk::utils::{safe_truncate, safe_window, truncate_for_display};
 
@@ -27,7 +27,7 @@ fn main() {
     // 2. Safe truncation
     println!("2. SAFE TRUNCATION");
     let safe = safe_truncate(emoji_text, 10);
-    println!("   safe_truncate(\"{}\", 10)", emoji_text);
+    println!("   safe_truncate(\"{emoji_text}\", 10)");
     println!("   Result: \"{}\" ({} bytes)", safe, safe.len());
     println!("   Stopped before emoji - no panic!");
     println!();
@@ -35,8 +35,8 @@ fn main() {
     // 3. Truncate for display (with ellipsis)
     println!("3. TRUNCATE FOR DISPLAY");
     let display = truncate_for_display(mixed_text, 10);
-    println!("   truncate_for_display(\"{}\", 10)", mixed_text);
-    println!("   Result: \"{}\"", display);
+    println!("   truncate_for_display(\"{mixed_text}\", 10)");
+    println!("   Result: \"{display}\"");
     println!();
 
     // 4. Chinese characters (3 bytes each)
@@ -62,9 +62,9 @@ fn main() {
     // 5. Safe window extraction
     println!("5. SAFE WINDOW EXTRACTION");
     let code = "fn process(data: 📊) -> Result<()>";
-    println!("   Code: \"{}\"", code);
+    println!("   Code: \"{code}\"");
     let window = safe_window(code, 25, 10);
-    println!("   safe_window(code, 25, 10) = \"{}\"", window);
+    println!("   safe_window(code, 25, 10) = \"{window}\"");
     println!();
 
     // 6. Real-world scenario: Error message preview
@@ -74,8 +74,8 @@ fn main() {
 
     // Simulate buffer overflow error with preview
     let preview = truncate_for_display(large_json, 40);
-    let error_msg = format!("JSON exceeded buffer size of 1MB. Preview: {}", preview);
-    println!("   Error: {}", error_msg);
+    let error_msg = format!("JSON exceeded buffer size of 1MB. Preview: {preview}");
+    println!("   Error: {error_msg}");
     println!();
 
     // 7. Verification: all results are valid UTF-8

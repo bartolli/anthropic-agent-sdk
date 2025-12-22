@@ -35,7 +35,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         while let Some(msg) = messages.next().await {
             match &msg {
                 Ok(Message::System { subtype, data }) => {
-                    println!("System message [{}]:", subtype);
+                    println!("System message [{subtype}]:");
                     if subtype == "init" {
                         println!("  Raw init data keys:");
                         if let Some(obj) = data.as_object() {
@@ -55,17 +55,17 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                                             mcp_tools.len()
                                         );
                                         for t in &mcp_tools {
-                                            println!("      - {}", t);
+                                            println!("      - {t}");
                                         }
                                     }
                                 } else {
-                                    let preview = format!("{}", value);
+                                    let preview = format!("{value}");
                                     let preview = if preview.len() > 200 {
                                         format!("{}...", &preview[..200])
                                     } else {
                                         preview
                                     };
-                                    println!("    {}: {}", key, preview);
+                                    println!("    {key}: {preview}");
                                 }
                             }
                         }
@@ -87,13 +87,13 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         println!();
         println!("Extra fields ({}):", info.extra.len());
         for (key, value) in &info.extra {
-            let preview = format!("{}", value);
+            let preview = format!("{value}");
             let preview = if preview.len() > 200 {
                 format!("{}...", &preview[..200])
             } else {
                 preview
             };
-            println!("  {}: {}", key, preview);
+            println!("  {key}: {preview}");
         }
     } else {
         println!("  None captured!");

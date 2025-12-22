@@ -1,16 +1,16 @@
 //! Knowledge Builder Example
 //!
 //! Demonstrates knowledge accumulation through iterative multi-source research:
-//! - SubagentStart hooks inject accumulated knowledge into sub-agents
-//! - PostToolUse hooks extract findings from tool responses
+//! - `SubagentStart` hooks inject accumulated knowledge into sub-agents
+//! - `PostToolUse` hooks extract findings from tool responses
 //! - Shared state accumulates knowledge across the session
 //!
 //! This is a Rust port of the TypeScript patterns from codanna-agent:
-//! - knowledgeBuilder AgentDefinition
+//! - knowledgeBuilder `AgentDefinition`
 //! - createKnowledgeHooks with knowledge accumulation
 //!
-//! Run with: cargo run --example knowledge_builder
-//! Run with debug: RUST_LOG=debug cargo run --example knowledge_builder
+//! Run with: cargo run --example `knowledge_builder`
+//! Run with debug: `RUST_LOG=debug` cargo run --example `knowledge_builder`
 
 use anthropic_agent_sdk::ClaudeSDKClient;
 use anthropic_agent_sdk::hooks::{HookManager, HookMatcherBuilder};
@@ -38,7 +38,7 @@ impl KnowledgeState {
     fn add_finding(&mut self, tool: &str, finding: &str, source: Option<&str>) {
         if !finding.is_empty() {
             self.accumulated
-                .push_str(&format!("\n---\n[{}] {}", tool, finding));
+                .push_str(&format!("\n---\n[{tool}] {finding}"));
             if let Some(src) = source {
                 self.sources.push(src.to_string());
             }
@@ -47,7 +47,7 @@ impl KnowledgeState {
 }
 
 /// Extract key findings from tool responses
-/// Note: tool_response is typically a plain string, not a nested JSON object
+/// Note: `tool_response` is typically a plain string, not a nested JSON object
 fn extract_findings(
     tool_name: &str,
     response: &serde_json::Value,

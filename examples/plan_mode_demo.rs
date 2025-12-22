@@ -8,7 +8,7 @@
 //!
 //! Note: Plan mode is a behavioral mode that instructs Claude to plan rather
 //! than hard-blocking tools. Claude may still use Write to create plan files
-//! and uses ExitPlanMode tool when ready for user approval.
+//! and uses `ExitPlanMode` tool when ready for user approval.
 
 use anthropic_agent_sdk::{
     ClaudeAgentOptions, ClaudeSDKClient, ContentBlock, Message, PermissionMode, SettingSource,
@@ -66,16 +66,16 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                                     println!("\n  [ExitPlanMode detected!]");
                                     if let Some(plan) = input.get("plan") {
                                         println!("  Plan content:");
-                                        println!("  {}", plan);
+                                        println!("  {plan}");
                                     }
                                 } else {
-                                    let input_str = format!("{}", input);
+                                    let input_str = format!("{input}");
                                     let preview = if input_str.len() > 80 {
                                         format!("{}...", &input_str[..80])
                                     } else {
                                         input_str
                                     };
-                                    println!("  [Tool: {}] {}", name, preview);
+                                    println!("  [Tool: {name}] {preview}");
                                 }
                             }
                             ContentBlock::Text { text } => {
@@ -84,7 +84,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                                     // Show Claude's analysis/planning text
                                     println!("\n  Claude:");
                                     for line in trimmed.lines().take(20) {
-                                        println!("    {}", line);
+                                        println!("    {line}");
                                     }
                                     if trimmed.lines().count() > 20 {
                                         println!("    ... (truncated)");
@@ -103,7 +103,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                 }
                 Ok(_) => {}
                 Err(e) => {
-                    println!("  [Error] {}", e);
+                    println!("  [Error] {e}");
                     break;
                 }
             }
@@ -120,8 +120,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         println!("  Is Plan Mode: {}", info.is_plan_mode());
     }
 
-    println!("  Tools used: {:?}", tool_uses);
-    println!("  ExitPlanMode detected: {}", exit_plan_detected);
+    println!("  Tools used: {tool_uses:?}");
+    println!("  ExitPlanMode detected: {exit_plan_detected}");
 
     // Categorize tools
     let read_only: Vec<_> = tool_uses
@@ -137,15 +137,15 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .filter(|t| matches!(t.as_str(), "EnterPlanMode" | "ExitPlanMode"))
         .collect();
 
-    println!("\n  Read-only tools: {:?}", read_only);
-    println!("  Plan mode tools: {:?}", plan_tools);
-    println!("  Write tools: {:?}", write_tools);
+    println!("\n  Read-only tools: {read_only:?}");
+    println!("  Plan mode tools: {plan_tools:?}");
+    println!("  Write tools: {write_tools:?}");
 
     if !write_tools.is_empty() {
         println!("\n  Note: Write/Edit in plan mode typically means writing to ~/.claude/plans/");
         println!("        (plan files, not project code changes)");
     }
-    println!("\n  ✅ Plan mode session completed");
+    println!("\n  Plan mode session completed");
 
     client.close().await?;
     Ok(())

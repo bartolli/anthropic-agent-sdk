@@ -2,6 +2,10 @@
 members = [".", "demos/tui-demo", "demos/role-play"]
 resolver = "2"
 
+[workspace.dependencies]
+# SDK - workspace members use this; path for dev, version for publish
+anthropic-agent-sdk = { version = "0.2.67", path = "." }
+
 [package]
 name = "anthropic-agent-sdk"
 version = "0.2.67"

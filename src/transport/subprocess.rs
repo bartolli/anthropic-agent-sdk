@@ -108,6 +108,11 @@ impl SubprocessTransport {
         cli_path: Option<PathBuf>,
         cancellation_token: Option<CancellationToken>,
     ) -> Result<Self> {
+        tracing::debug!(
+            "SubprocessTransport::new - output_format: {:?}",
+            options.output_format.as_ref().map(|f| &f.format_type)
+        );
+
         let cli_path = if let Some(path) = cli_path {
             path
         } else {
@@ -242,6 +247,11 @@ impl SubprocessTransport {
                 crate::types::PermissionMode::BypassPermissions => "bypassPermissions",
             };
             cmd.arg("--permission-mode").arg(mode_str);
+
+            // BypassPermissions requires the dangerous skip flag
+            if matches!(mode, crate::types::PermissionMode::BypassPermissions) {
+                cmd.arg("--dangerously-skip-permissions");
+            }
         }
 
         // Continue conversation
@@ -340,10 +350,11 @@ impl SubprocessTransport {
             cmd.arg("--fallback-model").arg(fallback);
         }
 
-        // Output format (JSON schema for structured outputs)
+        // JSON schema for structured outputs
         if let Some(ref output_format) = self.options.output_format {
-            let format_json = serde_json::to_string(output_format).unwrap_or_default();
-            cmd.arg("--output-format-json").arg(format_json);
+            let schema_json = serde_json::to_string(&output_format.schema).unwrap_or_default();
+            tracing::debug!("Adding --json-schema flag with schema: {}", schema_json);
+            cmd.arg("--json-schema").arg(schema_json);
         }
 
         // Sandbox settings
@@ -549,6 +560,11 @@ impl Transport for SubprocessTransport {
             return Ok(());
         }
 
+        tracing::debug!(
+            "SubprocessTransport::connect - output_format is {:?}",
+            self.options.output_format.as_ref().map(|f| &f.format_type)
+        );
+
         let mut cmd = self.build_command()?;
 
         // Set up environment - strict enforcement of dangerous variable blocking
@@ -599,6 +615,9 @@ impl Transport for SubprocessTransport {
         cmd.stdin(Stdio::piped())
             .stdout(Stdio::piped())
             .stderr(Stdio::piped()); // Pipe stderr to prevent terminal manipulation
+
+        // Log command for debugging
+        tracing::debug!("CLI command: {:?}", cmd);
 
         // Spawn process
         let mut child = cmd.spawn().map_err(|e| {
@@ -762,10 +781,17 @@ impl Transport for SubprocessTransport {
 
                                 // Try to parse JSON
                                 if let Ok(data) = serde_json::from_str::<serde_json::Value>(&json_buffer) {
-                                    tracing::trace!(
-                                        msg_type = data.get("type").and_then(|v| v.as_str()).unwrap_or("unknown"),
-                                        "Received message from CLI"
-                                    );
+                                    let msg_type = data.get("type").and_then(|v| v.as_str()).unwrap_or("unknown");
+                                    tracing::trace!(msg_type, "Received message from CLI");
+
+                                    // Debug log for result messages
+                                    if msg_type == "result" {
+                                        tracing::debug!(
+                                            "Raw result JSON: {}",
+                                            json_buffer.chars().take(500).collect::<String>()
+                                        );
+                                    }
+
                                     json_buffer.clear();
                                     if tx.send(Ok(data)).is_err() {
                                         // Receiver dropped, stop reading
@@ -912,9 +938,8 @@ mod tests {
     #[test]
     fn test_extra_args_allowlist_rejects_disallowed() {
         // Use same CLI discovery as production code
-        let cli_path = match SubprocessTransport::find_cli() {
-            Ok(path) => path,
-            Err(_) => return, // Skip if CLI not installed
+        let Ok(cli_path) = SubprocessTransport::find_cli() else {
+            return; // Skip if CLI not installed
         };
 
         let mut options = ClaudeAgentOptions::default();
@@ -935,9 +960,8 @@ mod tests {
     #[test]
     fn test_extra_args_allowlist_accepts_allowed() {
         // Use same CLI discovery as production code
-        let cli_path = match SubprocessTransport::find_cli() {
-            Ok(path) => path,
-            Err(_) => return, // Skip if CLI not installed
+        let Ok(cli_path) = SubprocessTransport::find_cli() else {
+            return; // Skip if CLI not installed
         };
 
         let mut options = ClaudeAgentOptions::default();
@@ -958,9 +982,8 @@ mod tests {
     #[tokio::test]
     async fn test_dangerous_env_vars_rejected() {
         // Use same CLI discovery as production code
-        let cli_path = match SubprocessTransport::find_cli() {
-            Ok(path) => path,
-            Err(_) => return, // Skip if CLI not installed
+        let Ok(cli_path) = SubprocessTransport::find_cli() else {
+            return; // Skip if CLI not installed
         };
 
         let mut options = ClaudeAgentOptions::default();
@@ -981,9 +1004,8 @@ mod tests {
     #[tokio::test]
     async fn test_safe_env_vars_accepted() {
         // Use same CLI discovery as production code
-        let cli_path = match SubprocessTransport::find_cli() {
-            Ok(path) => path,
-            Err(_) => return, // Skip if CLI not installed
+        let Ok(cli_path) = SubprocessTransport::find_cli() else {
+            return; // Skip if CLI not installed
         };
 
         let mut options = ClaudeAgentOptions::default();

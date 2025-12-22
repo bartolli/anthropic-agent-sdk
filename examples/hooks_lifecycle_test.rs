@@ -1,13 +1,13 @@
 //! Test hook lifecycle events with real CLI
 //!
 //! Demonstrates all hook events firing in sequence:
-//! - SessionStart (on init)
-//! - UserPromptSubmit (before sending message)
-//! - PreToolUse / PostToolUse (during tool execution)
+//! - `SessionStart` (on init)
+//! - `UserPromptSubmit` (before sending message)
+//! - `PreToolUse` / `PostToolUse` (during tool execution)
 //! - Stop (on result)
-//! - SessionEnd (on close)
+//! - `SessionEnd` (on close)
 //!
-//! Run with: RUST_LOG=debug cargo run --example hooks_lifecycle_test
+//! Run with: `RUST_LOG=debug` cargo run --example `hooks_lifecycle_test`
 
 use anthropic_agent_sdk::ClaudeSDKClient;
 use anthropic_agent_sdk::hooks::{HookManager, HookMatcherBuilder};
@@ -174,7 +174,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             // Extract stop_hook_active from input
             let stop_hook_active = input
                 .get("stop_hook_active")
-                .and_then(|v| v.as_bool())
+                .and_then(serde_json::Value::as_bool)
                 .unwrap_or(false);
 
             info!(
@@ -299,11 +299,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                                     let tools_count = data
                                         .get("tools")
                                         .and_then(|v| v.as_array())
-                                        .map(|a| a.len())
-                                        .unwrap_or(0);
-                                    format!("model={}, tools={}", model, tools_count)
+                                        .map_or(0, std::vec::Vec::len);
+                                    format!("model={model}, tools={tools_count}")
                                 }
-                                _ => format!("{:?}", data),
+                                _ => format!("{data:?}"),
                             };
                             info!(
                                 subtype = %subtype,

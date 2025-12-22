@@ -28,11 +28,32 @@ const THINKING_MESSAGES: &[&str] = &[
     "Composing thoughts",
 ];
 
+/// Scene analysis messages (for Haiku analyzer)
+const ANALYZER_MESSAGES: &[&str] = &[
+    "Reading the room",
+    "Sensing the tension",
+    "Gauging the heat",
+    "Feeling the beat",
+    "Studying dynamics",
+    "Parsing subtext",
+    "Noting chemistry",
+    "Tracking stakes",
+    "Measuring intensity",
+    "Analyzing rhythm",
+];
+
 /// Get a random thinking message
 pub fn get_random_message() -> &'static str {
     THINKING_MESSAGES
         .choose(&mut rand::rng())
         .unwrap_or(&THINKING_MESSAGES[0])
+}
+
+/// Get a random analyzer message
+pub fn get_analyzer_message() -> &'static str {
+    ANALYZER_MESSAGES
+        .choose(&mut rand::rng())
+        .unwrap_or(&ANALYZER_MESSAGES[0])
 }
 
 #[cfg(test)]

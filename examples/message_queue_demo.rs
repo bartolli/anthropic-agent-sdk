@@ -3,7 +3,7 @@
 //! Demonstrates the SDK's built-in message buffering feature.
 //! Queue messages anytime - they're sent automatically after each turn.
 //!
-//! Run with: RUST_LOG=info cargo run --example message_queue_demo
+//! Run with: `RUST_LOG=info` cargo run --example `message_queue_demo`
 
 use anthropic_agent_sdk::{ClaudeAgentOptions, ClaudeSDKClient, ContentBlock, Message};
 use tracing::info;

@@ -1,4 +1,4 @@
-//! Integration tests for ClaudeSDKClient
+//! Integration tests for `ClaudeSDKClient`
 //!
 //! These tests verify the client's ability to handle concurrent operations,
 //! bidirectional communication, and proper resource management.
@@ -190,8 +190,8 @@ async fn test_no_reader_writer_blocking() {
 
     let reader = tokio::spawn(async move {
         // Briefly lock to get channel (simulating read_messages())
-        let _guard = reader_resource.lock().await;
-        drop(_guard);
+        let guard = reader_resource.lock().await;
+        drop(guard);
 
         // Now read without holding lock
         while let Some(value) = rx.recv().await {

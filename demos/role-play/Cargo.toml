@@ -8,8 +8,8 @@ authors = ["Angel Bartolli <bartolli@gmail.com>"]
 license = "MIT"
 
 [dependencies]
-# SDK
-anthropic-agent-sdk = { path = "../.." }
+# SDK (workspace inheritance - uses path for dev, version for publish)
+anthropic-agent-sdk.workspace = true
 serde_json = "1.0"
 
 # Async

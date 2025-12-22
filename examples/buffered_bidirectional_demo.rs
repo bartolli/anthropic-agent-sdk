@@ -16,7 +16,7 @@
 //! This creates the illusion of bidirectional communication while
 //! respecting CLI's turn-based architecture.
 //!
-//! Run with: RUST_LOG=info cargo run --example buffered_bidirectional_demo
+//! Run with: `RUST_LOG=info` cargo run --example `buffered_bidirectional_demo`
 
 use anthropic_agent_sdk::{ClaudeAgentOptions, ClaudeSDKClient, ContentBlock, Message};
 use std::collections::VecDeque;

@@ -9,7 +9,7 @@
 //! - Implement custom authorization logic
 //! - Create allowlists and denylists
 //!
-//! Run with: cargo run --example permissions_demo
+//! Run with: cargo run --example `permissions_demo`
 
 use anthropic_agent_sdk::ClaudeSDKClient;
 use anthropic_agent_sdk::permissions::PermissionManager;
@@ -118,12 +118,12 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                         command.to_string()
                     };
 
-                    if sanitized_command != command {
+                    if sanitized_command == command {
+                        println!("  [PERMISSION] ✓ Command approved as-is");
+                    } else {
                         println!("  [PERMISSION] ⚠ Modified command for safety");
                         println!("    Original: {command}");
                         println!("    Modified: {sanitized_command}");
-                    } else {
-                        println!("  [PERMISSION] ✓ Command approved as-is");
                     }
 
                     // Return with modified input

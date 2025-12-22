@@ -17,8 +17,8 @@
 //! {"type": "control_request", "request_id": "req_...", "request": {"subtype": "interrupt"}}
 //! ```
 //!
-//! Run with: RUST_LOG=debug cargo run --example interrupt_demo
-//! Or: RUST_LOG=info cargo run --example interrupt_demo
+//! Run with: `RUST_LOG=debug` cargo run --example `interrupt_demo`
+//! Or: `RUST_LOG=info` cargo run --example `interrupt_demo`
 
 use anthropic_agent_sdk::{ClaudeAgentOptions, ClaudeSDKClient, ContentBlock, Message};
 use std::time::Duration;
@@ -198,14 +198,14 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         || second_response.to_lowercase().contains("history");
 
     if interrupted && context_preserved {
-        info!("✅ SUCCESS!");
+        info!("SUCCESS!");
         info!("   - Interrupt stopped the long response");
         info!("   - Context was preserved after interrupt");
         info!("   - Claude remembered the topic and gave a concise summary");
     } else if !interrupted {
-        warn!("⚠️  Response completed before interrupt was sent");
+        warn!("Response completed before interrupt was sent");
     } else {
-        warn!("⚠️  Context may not have been fully preserved");
+        warn!("Context may not have been fully preserved");
     }
 
     info!("");

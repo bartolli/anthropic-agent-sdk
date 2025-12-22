@@ -3,7 +3,7 @@
 //! Demonstrates the SDK's automatic session binding for security.
 //! Sessions are auto-bound on first Result - secure by default.
 //!
-//! Run with: RUST_LOG=info cargo run --example session_binding_demo
+//! Run with: `RUST_LOG=info` cargo run --example `session_binding_demo`
 
 use anthropic_agent_sdk::{ClaudeAgentOptions, ClaudeSDKClient, ContentBlock, Message};
 use tracing::info;

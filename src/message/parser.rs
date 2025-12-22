@@ -21,6 +21,14 @@ use crate::types::Message;
 /// timeout mechanism on read operations provides some protection against excessive
 /// parsing time.
 pub fn parse_message(data: serde_json::Value) -> Result<Message> {
+    // Debug log for result messages with structured_output
+    if data.get("type") == Some(&serde_json::json!("result")) {
+        tracing::debug!(
+            "Parsing result message, structured_output in JSON: {:?}",
+            data.get("structured_output")
+        );
+    }
+
     serde_json::from_value(data.clone()).map_err(|e| {
         ClaudeError::message_parse(format!("Failed to parse message: {e}"), Some(data))
     })

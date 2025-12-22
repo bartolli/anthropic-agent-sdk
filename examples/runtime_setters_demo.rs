@@ -8,7 +8,7 @@
 //! The Claude CLI doesn't support changing models mid-session via control messages,
 //! but we CAN resume a conversation with a different model using --resume.
 //!
-//! Run with: cargo run --example runtime_setters_demo
+//! Run with: cargo run --example `runtime_setters_demo`
 
 use anthropic_agent_sdk::{ClaudeAgentOptions, ClaudeSDKClient, ContentBlock, Message, SessionId};
 use futures::StreamExt;
@@ -45,7 +45,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                 Message::Assistant { message, .. } => {
                     for block in &message.content {
                         if let ContentBlock::Text { text } = block {
-                            println!("Haiku response: {}", text);
+                            println!("Haiku response: {text}");
                         }
                     }
                     first_model = message.model.clone();
@@ -57,7 +57,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                 } => {
                     // Capture session ID from Result message
                     session_id = Some(sid);
-                    println!("Model used: {}", first_model);
+                    println!("Model used: {first_model}");
                     for (model_id, usage) in &model_usage {
                         if usage.output_tokens > 0 {
                             println!(
@@ -76,7 +76,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     }
 
     let session_id = session_id.ok_or("Failed to get session ID from result")?;
-    println!("Session ID captured: {}", session_id);
+    println!("Session ID captured: {session_id}");
 
     // Close the haiku session
     client.close().await?;
@@ -87,7 +87,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // =========================================================================
     println!("Step 2: Resuming session with SONNET model");
     println!("-------------------------------------------");
-    println!("Using session ID: {}", session_id);
+    println!("Using session ID: {session_id}");
 
     let sonnet_options = ClaudeAgentOptions::builder()
         .model("sonnet") // Different model!
@@ -110,13 +110,13 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                 Message::Assistant { message, .. } => {
                     for block in &message.content {
                         if let ContentBlock::Text { text } = block {
-                            println!("Sonnet response: {}", text);
+                            println!("Sonnet response: {text}");
                         }
                     }
                     second_model = message.model.clone();
                 }
                 Message::Result { model_usage, .. } => {
-                    println!("Model used: {}", second_model);
+                    println!("Model used: {second_model}");
                     for (model_id, usage) in &model_usage {
                         if usage.output_tokens > 0 {
                             println!(
@@ -141,8 +141,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Summary
     // =========================================================================
     println!("\n========== Summary ==========");
-    println!("First query model:  {}", first_model);
-    println!("Second query model: {}", second_model);
+    println!("First query model:  {first_model}");
+    println!("Second query model: {second_model}");
 
     if first_model.contains("haiku") && second_model.contains("sonnet") {
         println!("\nSUCCESS: Model was switched mid-conversation!");

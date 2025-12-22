@@ -230,17 +230,14 @@ async fn test_request_id_uniqueness() {
     let req2 = handler.create_interrupt_request();
     let req3 = handler.create_send_message_request("test".to_string());
 
-    let id1 = match req1 {
-        ControlRequest::Interrupt { id } => id,
-        _ => panic!(),
+    let ControlRequest::Interrupt { id: id1 } = req1 else {
+        panic!()
     };
-    let id2 = match req2 {
-        ControlRequest::Interrupt { id } => id,
-        _ => panic!(),
+    let ControlRequest::Interrupt { id: id2 } = req2 else {
+        panic!()
     };
-    let id3 = match req3 {
-        ControlRequest::SendMessage { id, .. } => id,
-        _ => panic!(),
+    let ControlRequest::SendMessage { id: id3, .. } = req3 else {
+        panic!()
     };
 
     assert_ne!(id1, id2);

@@ -10,10 +10,10 @@
 //! ## Prerequisites
 //!
 //! Build the MCP server example first:
-//!   cargo build --example mcp_server --features rmcp
+//!   cargo build --example `mcp_server` --features rmcp
 //!
 //! Then run this integration example:
-//!   cargo run --example mcp_integration
+//!   cargo run --example `mcp_integration`
 //!
 //! ## How It Works
 //!
@@ -37,8 +37,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let manifest_dir = env::var("CARGO_MANIFEST_DIR").unwrap_or_else(|_| ".".to_string());
 
     // Check release first, then debug
-    let release_path = format!("{}/target/release/examples/mcp_server", manifest_dir);
-    let debug_path = format!("{}/target/debug/examples/mcp_server", manifest_dir);
+    let release_path = format!("{manifest_dir}/target/release/examples/mcp_server");
+    let debug_path = format!("{manifest_dir}/target/debug/examples/mcp_server");
 
     let server_path = if std::path::Path::new(&release_path).exists() {
         release_path
@@ -46,14 +46,14 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         debug_path
     } else {
         eprintln!("Error: MCP server binary not found.");
-        eprintln!("Checked: {}", release_path);
-        eprintln!("Checked: {}", debug_path);
+        eprintln!("Checked: {release_path}");
+        eprintln!("Checked: {debug_path}");
         eprintln!("\nPlease build it first:");
         eprintln!("  cargo build --example mcp_server --features rmcp");
         std::process::exit(1);
     };
 
-    println!("Using MCP server: {}\n", server_path);
+    println!("Using MCP server: {server_path}\n");
 
     // Configure the MCP server
     let mut mcp_servers = HashMap::new();
@@ -84,7 +84,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     // Send a message that should trigger tool use
     let prompt = "Please calculate 42 + 17 using the add tool, and then get the weather for Tokyo.";
-    println!("User: {}\n", prompt);
+    println!("User: {prompt}\n");
 
     client.send_message(prompt).await?;
 
@@ -96,31 +96,31 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                 for block in message.content {
                     match block {
                         anthropic_agent_sdk::ContentBlock::Text { text } => {
-                            println!("  {}", text);
+                            println!("  {text}");
                         }
                         anthropic_agent_sdk::ContentBlock::ToolUse { name, input, .. } => {
-                            println!("  [Using tool: {} with {:?}]", name, input);
+                            println!("  [Using tool: {name} with {input:?}]");
                         }
                         anthropic_agent_sdk::ContentBlock::ToolResult {
                             content,
                             tool_use_id,
                             ..
                         } => {
-                            println!("  [Tool result for {}]", tool_use_id);
+                            println!("  [Tool result for {tool_use_id}]");
                             if let Some(value) = content {
                                 match value {
                                     anthropic_agent_sdk::ContentValue::String(text) => {
-                                        println!("    => {}", text);
+                                        println!("    => {text}");
                                     }
                                     anthropic_agent_sdk::ContentValue::Blocks(blocks) => {
-                                        println!("    => {:?}", blocks);
+                                        println!("    => {blocks:?}");
                                     }
                                 }
                             }
                         }
                         other => {
                             // Debug: print any other content block types
-                            println!("  [Other block: {:?}]", other);
+                            println!("  [Other block: {other:?}]");
                         }
                     }
                 }
@@ -135,14 +135,14 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                             ..
                         } = block
                         {
-                            println!("  [Tool result for {}]", tool_use_id);
+                            println!("  [Tool result for {tool_use_id}]");
                             if let Some(value) = content {
                                 match value {
                                     anthropic_agent_sdk::ContentValue::String(text) => {
-                                        println!("    => {}", text);
+                                        println!("    => {text}");
                                     }
                                     anthropic_agent_sdk::ContentValue::Blocks(b) => {
-                                        println!("    => {:?}", b);
+                                        println!("    => {b:?}");
                                     }
                                 }
                             }
@@ -153,7 +153,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             Message::Result { result, .. } => {
                 // Print the final result text if present
                 if let Some(ref text) = result {
-                    println!("\n  Final result: {}", text);
+                    println!("\n  Final result: {text}");
                 }
                 println!("\n[Conversation complete]");
                 break;

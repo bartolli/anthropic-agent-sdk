@@ -15,7 +15,7 @@
 //! Each turn creates a new client that resumes the previous session via `--resume`.
 //! Context is preserved across turns - Claude remembers previous exchanges.
 //!
-//! Run with: RUST_LOG=info cargo run --example bidirectional_demo
+//! Run with: `RUST_LOG=info` cargo run --example `bidirectional_demo`
 
 use anthropic_agent_sdk::{ClaudeAgentOptions, ClaudeSDKClient, ContentBlock, Message};
 use std::time::Duration;

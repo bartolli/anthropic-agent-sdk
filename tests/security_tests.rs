@@ -50,8 +50,7 @@ async fn test_timeout_actually_prevents_blocking() {
     // CRITICAL: If timeout didn't work, this would be ~10s
     assert!(
         elapsed < Duration::from_millis(500),
-        "Timeout failed! Took {:?} (expected < 500ms)",
-        elapsed
+        "Timeout failed! Took {elapsed:?} (expected < 500ms)"
     );
 
     // Verify we got a result (timeout returns default, doesn't error)
@@ -132,8 +131,7 @@ async fn test_timeout_boundary_just_over() {
     // Should timeout quickly, not wait 200ms
     assert!(
         elapsed < Duration::from_millis(150),
-        "Should have timed out at 50ms, took {:?}",
-        elapsed
+        "Should have timed out at 50ms, took {elapsed:?}"
     );
     assert!(result.system_message.is_none());
 }
@@ -197,8 +195,7 @@ async fn test_multiple_hooks_timeout_independently() {
     // Should complete in ~200ms (100ms timeout for slow hook + fast hooks)
     assert!(
         elapsed < Duration::from_secs(1),
-        "Multiple hooks should not block: {:?}",
-        elapsed
+        "Multiple hooks should not block: {elapsed:?}"
     );
 
     // Fast hooks ran, slow hook was cancelled mid-execution

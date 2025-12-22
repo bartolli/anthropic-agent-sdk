@@ -3,7 +3,7 @@
 //! This example captures and prints raw hook data from Claude CLI
 //! to understand the actual protocol format.
 //!
-//! Run with: cargo run --example hook_debug
+//! Run with: cargo run --example `hook_debug`
 
 use anthropic_agent_sdk::ClaudeSDKClient;
 use anthropic_agent_sdk::types::{ClaudeAgentOptions, Message};
@@ -27,8 +27,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         tokio::spawn(async move {
             while let Some((hook_id, event)) = hook_rx.recv().await {
                 println!("\n[HOOK EVENT RECEIVED]");
-                println!("  Hook ID: {}", hook_id);
-                println!("  Event: {:?}", event);
+                println!("  Hook ID: {hook_id}");
+                println!("  Event: {event:?}");
                 println!();
             }
         });
@@ -44,7 +44,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         match tokio::time::timeout(Duration::from_secs(60), client.next_message()).await {
             Ok(Some(message)) => match message {
                 Ok(Message::Result { session_id, .. }) => {
-                    println!("\n[RESULT] Session: {}", session_id);
+                    println!("\n[RESULT] Session: {session_id}");
                     break;
                 }
                 Ok(Message::Assistant { message, .. }) => {
@@ -53,7 +53,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                         if let anthropic_agent_sdk::types::ContentBlock::ToolUse { name, .. } =
                             block
                         {
-                            println!("[TOOL USE] {}", name);
+                            println!("[TOOL USE] {name}");
                         }
                     }
                 }
@@ -61,7 +61,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                     println!("[OTHER] {:?}", std::mem::discriminant(&msg));
                 }
                 Err(e) => {
-                    eprintln!("[ERROR] {}", e);
+                    eprintln!("[ERROR] {e}");
                     break;
                 }
             },

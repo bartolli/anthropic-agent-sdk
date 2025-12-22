@@ -446,7 +446,7 @@ mod tests {
                 }))
             } else {
                 Ok(PermissionResult::Deny(PermissionResultDeny {
-                    message: format!("Denied: {}", tool_name),
+                    message: format!("Denied: {tool_name}"),
                     interrupt: false,
                 }))
             }

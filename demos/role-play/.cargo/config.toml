@@ -1,0 +1,9 @@
+[alias]
+# Linting
+lint = "clippy -- -D warnings"
+lint-pedantic = "clippy -- -W clippy::pedantic"
+lint-strict = "clippy -- -D warnings -D clippy::pedantic"
+fix-pedantic = "clippy --fix --allow-dirty --allow-staged -- -W clippy::pedantic"
+
+# Full check (build + test + lint)
+check-all = ["build", "test", "lint"]

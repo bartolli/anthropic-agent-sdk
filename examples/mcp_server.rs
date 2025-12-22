@@ -6,7 +6,7 @@
 //! 2. Listing available tools with descriptions
 //! 3. Calling tools directly to verify they work
 //!
-//! Run with: cargo run --example mcp_server --features rmcp
+//! Run with: cargo run --example `mcp_server` --features rmcp
 
 #[cfg(feature = "rmcp")]
 mod server {
@@ -135,7 +135,7 @@ mod server {
             let mut notes = self.notes.lock().await;
             let count = notes.len();
             notes.clear();
-            format!("Cleared {} notes.", count)
+            format!("Cleared {count} notes.")
         }
     }
 
@@ -198,19 +198,19 @@ mod server {
 
     fn print_separator(title: &str) {
         let line = "─".repeat(58);
-        println!("\n┌{}┐", line);
-        println!("│ {:<56} │", title);
-        println!("└{}┘", line);
+        println!("\n┌{line}┐");
+        println!("│ {title:<56} │");
+        println!("└{line}┘");
     }
 
     fn print_tool(name: &str, description: &str, params: &[(&str, &str)]) {
-        println!("  ▸ {}", name);
-        println!("    {}", description);
+        println!("  ▸ {name}");
+        println!("    {description}");
         if !params.is_empty() {
             print!("    Parameters: ");
             let param_strs: Vec<_> = params
                 .iter()
-                .map(|(n, t)| format!("{}: {}", n, t))
+                .map(|(n, t)| format!("{n}: {t}"))
                 .collect();
             println!("{}", param_strs.join(", "));
         }
@@ -220,9 +220,9 @@ mod server {
     fn print_call(call: &str, result: &str, is_error: bool) {
         println!("  {} {}", if is_error { "✗" } else { "✓" }, call);
         if is_error {
-            println!("    └─ Error: {}", result);
+            println!("    └─ Error: {result}");
         } else {
-            println!("    └─ {}", result);
+            println!("    └─ {result}");
         }
     }
 
@@ -259,7 +259,7 @@ mod server {
                 "echoed": params.unwrap_or(json!(null))
             })),
 
-            _ => Err(format!("Method not found: {}", method)),
+            _ => Err(format!("Method not found: {method}")),
         }
     }
 
@@ -279,7 +279,7 @@ mod server {
             info.server_info.name, info.server_info.version
         );
         if let Some(ref instructions) = info.instructions {
-            println!("  Purpose: {}", instructions);
+            println!("  Purpose: {instructions}");
         }
 
         // List tools by category
@@ -382,7 +382,7 @@ mod server {
         let result = server.list_notes().await;
         println!("  ✓ list_notes()");
         for line in result.lines() {
-            println!("    │ {}", line);
+            println!("    │ {line}");
         }
 
         // Custom protocol extensions demo (rmcp 0.12.0+)
@@ -440,7 +440,7 @@ mod server {
             Ok(_) => print_call("demo/unknown", "Unexpected success", true),
             Err(e) => {
                 println!("  ✓ demo/unknown (expected error)");
-                println!("    └─ {}", e);
+                println!("    └─ {e}");
             }
         }
 

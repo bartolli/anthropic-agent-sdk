@@ -1,13 +1,13 @@
-//! Example demonstrating introspection methods in ClaudeSDKClient
+//! Example demonstrating introspection methods in `ClaudeSDKClient`
 //!
 //! This example shows how to use:
-//! - session_info() - Get session initialization data (model, tools, cwd)
-//! - supported_models() - Get list of available models
-//! - supported_commands() - Get available slash commands
-//! - mcp_server_status() - Get MCP server connection status
-//! - account_info() - Get account information
+//! - `session_info()` - Get session initialization data (model, tools, cwd)
+//! - `supported_models()` - Get list of available models
+//! - `supported_commands()` - Get available slash commands
+//! - `mcp_server_status()` - Get MCP server connection status
+//! - `account_info()` - Get account information
 //!
-//! Run with: cargo run --example introspection_demo
+//! Run with: cargo run --example `introspection_demo`
 
 use anthropic_agent_sdk::{ClaudeAgentOptions, ClaudeSDKClient, Message, SettingSource};
 use futures::StreamExt;
@@ -93,7 +93,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         };
         println!("  - {}{}", model.id, thinking);
         if let Some(name) = &model.name {
-            println!("    Name: {}", name);
+            println!("    Name: {name}");
         }
     }
 
@@ -131,7 +131,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             let icon = if server.is_connected() { "✓" } else { "✗" };
             println!("  {} {} ({})", icon, server.name, server.status);
             if let Some(err) = &server.error {
-                println!("    Error: {}", err);
+                println!("    Error: {err}");
             }
             if !server.tools.is_empty() {
                 println!("    Tools: {}", server.tools.join(", "));
@@ -159,7 +159,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         } else {
             println!("Available skills: {}", skills.len());
             for skill in &skills {
-                println!("  - {}", skill);
+                println!("  - {skill}");
             }
         }
     }
@@ -183,7 +183,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         } else {
             println!("Installed plugins: {}", plugins.len());
             for plugin in &plugins {
-                println!("  - {}", plugin);
+                println!("  - {plugin}");
             }
         }
     }
@@ -207,7 +207,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         } else {
             println!("Available agents: {}", agents.len());
             for agent in &agents {
-                println!("  - {}", agent);
+                println!("  - {agent}");
             }
         }
     }
@@ -222,16 +222,16 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         Ok(info) => {
             println!("OAuth account: {}", info.is_oauth);
             if let Some(email) = &info.email {
-                println!("Email: {}", email);
+                println!("Email: {email}");
             }
             if let Some(account_id) = &info.account_id {
-                println!("Account ID: {}", account_id);
+                println!("Account ID: {account_id}");
             }
             if let Some(org_id) = &info.organization_id {
-                println!("Organization: {}", org_id);
+                println!("Organization: {org_id}");
             }
         }
-        Err(e) => println!("Error getting account info: {}", e),
+        Err(e) => println!("Error getting account info: {e}"),
     }
 
     // Cleanup

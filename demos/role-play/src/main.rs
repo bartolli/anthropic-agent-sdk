@@ -25,9 +25,31 @@ use anthropic_agent_sdk::{
     ClaudeAgentOptions, ClaudeSDKClient, ContentBlock, Message, OutputFormat, PermissionMode,
     SettingSource, SystemPrompt, ToolName,
 };
-use clap::Parser;
+use clap::{Parser, ValueEnum};
 use console::style;
 use std::path::{Path, PathBuf};
+
+/// Model selection for agents
+#[derive(Debug, Clone, Copy, ValueEnum, Default)]
+pub enum Model {
+    /// Claude Opus - most capable
+    Opus,
+    /// Claude Sonnet - balanced (default)
+    #[default]
+    Sonnet,
+    /// Claude Haiku - fastest, most economical
+    Haiku,
+}
+
+impl Model {
+    fn as_str(self) -> &'static str {
+        match self {
+            Self::Opus => "opus",
+            Self::Sonnet => "sonnet",
+            Self::Haiku => "haiku",
+        }
+    }
+}
 use std::time::Instant;
 
 /// Two-agent role-play orchestrator
@@ -62,6 +84,14 @@ struct Args {
     /// Opening line to start the conversation (given to Agent A)
     #[arg(long, short = 'o')]
     opening: Option<String>,
+
+    /// Model to use for agents (opus, sonnet, haiku)
+    #[arg(long, short = 'm', value_enum, default_value_t = Model::Sonnet)]
+    model: Model,
+
+    /// Model for semantic analyzer (defaults to haiku for cost efficiency)
+    #[arg(long, value_enum, default_value_t = Model::Haiku)]
+    analyzer_model: Model,
 }
 
 /// Get the history file path
@@ -276,6 +306,7 @@ async fn spawn_analyzer(
     before_state: &SceneState,
     resume_session: Option<&str>,
     director_note: Option<&str>,
+    model: Model,
 ) -> anyhow::Result<(Option<AnalysisResult>, Option<String>)> {
     let analyzer_persona = demo_root.join("personas").join("analyzer.txt");
 
@@ -362,7 +393,7 @@ Analyze this dialogue and return your analysis as JSON.
     // Build options - resume session if we have one for continuity
     let options = match resume_session {
         Some(session_id) => ClaudeAgentOptions::builder()
-            .model("haiku".to_string())
+            .model(model.as_str().to_string())
             .cwd(demo_root.to_path_buf())
             .setting_sources(vec![SettingSource::Local])
             .system_prompt(SystemPrompt::File(analyzer_persona))
@@ -378,7 +409,7 @@ Analyze this dialogue and return your analysis as JSON.
             }))
             .build(),
         None => ClaudeAgentOptions::builder()
-            .model("haiku".to_string())
+            .model(model.as_str().to_string())
             .cwd(demo_root.to_path_buf())
             .setting_sources(vec![SettingSource::Local])
             .system_prompt(SystemPrompt::File(analyzer_persona))
@@ -389,7 +420,7 @@ Analyze this dialogue and return your analysis as JSON.
             .max_turns(15_u32)
             .env(env)
             .stderr(std::sync::Arc::new(|line| {
-                tracing::warn!("[Haiku stderr] {}", line);
+                tracing::warn!("[Analyzer stderr] {}", line);
             }))
             .build(),
     };
@@ -591,6 +622,7 @@ async fn create_agent(
     scene: Option<&str>,
     resume_session: Option<&str>,
     agent_name: &str,
+    model: Model,
 ) -> anyhow::Result<ClaudeSDKClient> {
     // Demo root directory (where .claude/ lives)
     // CARGO_MANIFEST_DIR is set at compile time to the directory containing Cargo.toml
@@ -607,6 +639,7 @@ async fn create_agent(
     // typed-builder requires full chain, so we use match for optional fields
     let options = match (scene, resume_session) {
         (Some(scene_text), Some(session_id)) => ClaudeAgentOptions::builder()
+            .model(model.as_str().to_string())
             .cwd(demo_root.clone())
             .setting_sources(vec![SettingSource::Local])
             .system_prompt(SystemPrompt::File(persona_path.to_path_buf()))
@@ -616,6 +649,7 @@ async fn create_agent(
             .env(env)
             .build(),
         (Some(scene_text), None) => ClaudeAgentOptions::builder()
+            .model(model.as_str().to_string())
             .cwd(demo_root.clone())
             .setting_sources(vec![SettingSource::Local])
             .system_prompt(SystemPrompt::File(persona_path.to_path_buf()))
@@ -624,6 +658,7 @@ async fn create_agent(
             .env(env)
             .build(),
         (None, Some(session_id)) => ClaudeAgentOptions::builder()
+            .model(model.as_str().to_string())
             .cwd(demo_root.clone())
             .setting_sources(vec![SettingSource::Local])
             .system_prompt(SystemPrompt::File(persona_path.to_path_buf()))
@@ -632,6 +667,7 @@ async fn create_agent(
             .env(env)
             .build(),
         (None, None) => ClaudeAgentOptions::builder()
+            .model(model.as_str().to_string())
             .cwd(demo_root)
             .setting_sources(vec![SettingSource::Local])
             .system_prompt(SystemPrompt::File(persona_path.to_path_buf()))
@@ -1053,7 +1089,15 @@ async fn main() -> anyhow::Result<()> {
             let mut turn_response: Option<String> = None;
             let mut turn_succeeded = false;
 
-            match create_agent(persona_path, args.scene.as_deref(), session_id, name).await {
+            match create_agent(
+                persona_path,
+                args.scene.as_deref(),
+                session_id,
+                name,
+                args.model,
+            )
+            .await
+            {
                 Ok(mut client) => {
                     match run_agent_turn(&mut client, &prompt, name, is_agent_a).await {
                         Ok(result) => {
@@ -1101,6 +1145,7 @@ async fn main() -> anyhow::Result<()> {
                         &before_state,
                         analyzer_session_id.as_deref(),
                         director_note.as_deref(),
+                        args.analyzer_model,
                     )
                     .await
                     {

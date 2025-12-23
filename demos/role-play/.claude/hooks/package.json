@@ -1,0 +1,15 @@
+{
+  "name": "role-play-hooks",
+  "version": "1.0.0",
+  "description": "Scene management hooks for Claude role-play demo",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "hook:scene-state": "node scene-state-hook.js",
+    "hook:state-update": "node state-updater-hook.js",
+    "test": "node tests/run-tests.js",
+    "test:matcher": "node -e \"import('./shared/matcher.js').then(m => console.log('Matcher loaded:', Object.keys(m)))\"",
+    "test:scene-state": "echo '{\"prompt\":\"test\"}' | CLAUDE_PROJECT_DIR=$(pwd)/.. node scene-state-hook.js",
+    "test:state-update": "echo '{\"tool_response\":{\"content\":\"test\"}}' | CLAUDE_PROJECT_DIR=$(pwd)/.. node state-updater-hook.js"
+  }
+}

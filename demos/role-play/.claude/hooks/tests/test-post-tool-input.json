@@ -1,0 +1,17 @@
+{
+  "session_id": "test-session-123",
+  "transcript_path": "/tmp/test-transcript.jsonl",
+  "cwd": "/Users/test/project",
+  "permission_mode": "default",
+  "hook_event_name": "PostToolUse",
+  "tool_name": "Write",
+  "tool_input": {
+    "file_path": "/test/dialogue.txt",
+    "content": "I confess everything. The truth is I betrayed you."
+  },
+  "tool_response": {
+    "success": true,
+    "content": "I confess everything. The truth is I betrayed you."
+  },
+  "tool_use_id": "toolu_test123"
+}

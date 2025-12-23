@@ -6,6 +6,10 @@ rust-version = "1.85.0"
 description = "Two-agent role-play demo - Claude agents with different personas conversing"
 authors = ["Angel Bartolli <bartolli@gmail.com>"]
 license = "MIT"
+readme = "README.md"
+repository = "https://github.com/bartolli/anthropic-agent-sdk"
+keywords = ["claude", "ai", "agent", "roleplay", "multi-agent"]
+categories = ["command-line-utilities", "simulation"]
 
 [dependencies]
 # SDK (workspace inheritance - uses path for dev, version for publish)

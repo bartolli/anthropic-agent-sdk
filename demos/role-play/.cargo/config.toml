@@ -1,9 +1,8 @@
 [alias]
-# Linting
-lint = "clippy -- -D warnings"
-lint-pedantic = "clippy -- -W clippy::pedantic"
-lint-strict = "clippy -- -D warnings -D clippy::pedantic"
-fix-pedantic = "clippy --fix --allow-dirty --allow-staged -- -W clippy::pedantic"
+# Linting (binary crate - no --lib flag)
+lint = "clippy --all-targets -- -D warnings"
+lint-pedantic = "clippy --all-targets -- -W clippy::pedantic"
+lint-strict = "clippy --all-targets -- -D warnings -D clippy::pedantic"
+fix-pedantic = "clippy --fix --all-targets --allow-dirty --allow-staged -- -W clippy::pedantic"
 
-# Full check (build + test + lint)
-check-all = ["build", "test", "lint"]
+# Note: For full check, run: cargo build && cargo lint

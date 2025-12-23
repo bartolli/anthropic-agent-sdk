@@ -1,0 +1,142 @@
+{
+  "version": "1.0",
+  "description": "Scene state rules for role-play demo. Defines meters, beats, and triggers.",
+
+  "meters": {
+    "tension": {
+      "description": "Narrative tension and conflict level",
+      "range": [1, 10],
+      "default": 5,
+      "thresholds": {
+        "low_below": 3,
+        "alert_above": 6,
+        "critical_above": 8
+      },
+      "levels": {
+        "1-2": "Calm - characters relaxed, low stakes",
+        "3-4": "Uneasy - something feels off",
+        "5-6": "Tense - conflict brewing, watchful",
+        "7-8": "High stakes - danger imminent, pressure mounting",
+        "9-10": "Critical - breaking point, now or never"
+      },
+      "modifiers": {
+        "increase": [
+          "threat", "danger", "betray", "suspect", "fear", "anger",
+          "accuse", "lie", "hide", "weapon", "dead", "kill", "trap"
+        ],
+        "decrease": [
+          "calm", "trust", "safe", "relax", "peace", "agree",
+          "laugh", "smile", "relief", "escape", "free"
+        ]
+      }
+    },
+
+    "heat": {
+      "description": "Romantic/intimate intensity level",
+      "range": [1, 5],
+      "default": 1,
+      "thresholds": {
+        "alert_above": 2,
+        "critical_above": 4
+      },
+      "levels": {
+        "1": "Professional distance - focus on plot, no romantic subtext",
+        "2": "Awareness - subtle tension, noticing each other",
+        "3": "Flirtation - meaningful touches, lingering looks, charged moments",
+        "4": "Passion restrained - desire vs duty, almost moments",
+        "5": "Unbridled - consequences be damned, giving in"
+      },
+      "modifiers": {
+        "increase": [
+          "touch", "close", "lips", "eyes met", "heart", "breath",
+          "whisper", "skin", "pulse", "lean in", "desire", "want"
+        ],
+        "decrease": [
+          "step back", "distance", "professional", "cold", "duty",
+          "mission", "focus", "later", "can't"
+        ]
+      }
+    }
+  },
+
+  "beats": {
+    "exposition": {
+      "description": "Setting the scene, establishing context",
+      "triggers": {
+        "keywords": ["let me explain", "you should know", "background"],
+        "intentPatterns": ["(first|before).*understand"]
+      },
+      "effects": {}
+    },
+
+    "confrontation": {
+      "description": "Direct conflict between characters",
+      "triggers": {
+        "keywords": ["accuse", "confront", "betray", "you lied", "truth"],
+        "intentPatterns": ["(you|I).*(never|always|how could)"]
+      },
+      "effects": {
+        "tension": 2
+      },
+      "guidance": "The conflict is now direct. Characters must face each other."
+    },
+
+    "revelation": {
+      "description": "A secret is revealed, information changes everything",
+      "triggers": {
+        "keywords": ["reveal", "secret", "truth", "confession", "i confess", "admit"],
+        "intentPatterns": ["(discover|realize|find out).*truth", "all along"]
+      },
+      "effects": {
+        "tension": 1
+      },
+      "guidance": "New information has surfaced. React with appropriate weight."
+    },
+
+    "intimate-moment": {
+      "description": "Characters share a vulnerable or romantic moment",
+      "triggers": {
+        "keywords": ["alone together", "close", "whisper", "eyes locked", "touched"],
+        "intentPatterns": ["(we|I).*alone", "lean(ed|ing)? (in|closer)"]
+      },
+      "effects": {
+        "heat": 1,
+        "tension": -1
+      },
+      "guidance": "A moment of connection amid the chaos. Let it breathe."
+    },
+
+    "climax": {
+      "description": "The peak moment - everything comes to a head",
+      "triggers": {
+        "keywords": ["now or never", "end this", "final", "no choice", "must"],
+        "intentPatterns": ["(this is|it's) (it|over|time)", "one last"]
+      },
+      "effects": {
+        "tension": 3
+      },
+      "guidance": "This is the moment everything has built toward. Maximum stakes."
+    },
+
+    "resolution": {
+      "description": "Conflict resolves, new equilibrium",
+      "triggers": {
+        "keywords": ["understand", "forgive", "accept", "peace", "together", "over"],
+        "intentPatterns": ["(finally|now).*understand", "it's done"]
+      },
+      "effects": {
+        "tension": -3,
+        "heat": -1
+      },
+      "guidance": "The storm has passed. What remains?"
+    }
+  },
+
+  "guidance_templates": {
+    "tension_critical": "⚠️ TENSION CRITICAL - The situation is at breaking point. Consider dramatic pivot or release.",
+    "tension_high": "Tension is high. Stakes matter. Every word carries weight.",
+    "tension_low": "💡 LOW TENSION - Build suspense. Add conflict or mystery.",
+    "heat_building": "💫 Romantic tension building. Use restraint to amplify desire.",
+    "heat_critical": "🔥 Heat at peak. The pull between characters is undeniable."
+  }
+}

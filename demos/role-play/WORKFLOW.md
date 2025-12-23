@@ -2,6 +2,46 @@
 
 Multi-agent conversation system with semantic analysis and director control.
 
+Built with [anthropic-agent-sdk](https://crates.io/crates/anthropic-agent-sdk) to demonstrate
+multi-turn agentic workflows with human-in-the-loop control. This demo proves Claude Code
+can power applications beyond coding: interactive storytelling, creative collaboration,
+and stateful multi-agent systems. Both a fun experiment and a useful reference implementation.
+
+## Running the Demo
+
+**From workspace root:**
+```bash
+cargo run -p claude-role-play -- \
+  --persona-a demos/role-play/personas/detective.txt \
+  --persona-b demos/role-play/personas/artist.txt \
+  --name-a "Detective Rourke" \
+  --name-b "Luna" \
+  --scene "Investigating a mysterious art heist" \
+  --turns 4
+```
+
+**From demos/role-play/ directory:**
+```bash
+cargo run -- \
+  --persona-a personas/detective.txt \
+  --persona-b personas/artist.txt \
+  --name-a "Detective Rourke" \
+  --name-b "Luna" \
+  --scene "Investigating a mysterious art heist" \
+  --turns 4
+```
+
+**With debug logging:**
+```bash
+RUST_LOG=claude_role_play=info cargo run -p claude-role-play -- \
+  --persona-a demos/role-play/personas/detective.txt \
+  --persona-b demos/role-play/personas/artist.txt \
+  --name-a "Detective Rourke" \
+  --name-b "Luna" \
+  --scene "Investigating a mysterious art heist" \
+  --turns 2
+```
+
 ## Components
 
 | Component | Role |

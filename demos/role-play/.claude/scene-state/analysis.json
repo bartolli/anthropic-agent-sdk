@@ -1,0 +1,17 @@
+{
+  "beat": {
+    "changed": false,
+    "current": "confrontation"
+  },
+  "director_aligned": true,
+  "heat": {
+    "from": 2,
+    "reason": "Luna introduces deliberate charm offensive with lingering eye contact, physical proximity, intimate address ('Sam'), and sensual language. Flirtation and meaningful attention begin establishing connection per director's note.",
+    "to": 3
+  },
+  "tension": {
+    "from": 7,
+    "reason": "Luna's charm and intellectual engagement de-escalate immediate confrontational pressure, but her final probing question redirects investigation back to the detective. Underlying stakes remain tense but less acute.",
+    "to": 6
+  }
+}

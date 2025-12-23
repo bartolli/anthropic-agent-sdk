@@ -238,6 +238,41 @@ Subagents (via Task tool) share the parent session ID, so auto-bind works correc
 - Validation: `src/client.rs` (`validate_session()`, `send_message()`)
 - Error type: `src/error.rs:100-107`
 
+### 10. OAuth Token Security
+
+The OAuth module stores authentication tokens with appropriate security measures:
+
+#### Token Storage
+
+- **Location**: Platform-specific config directory
+  - macOS: `~/Library/Application Support/claude-sdk/oauth_token.json`
+  - Linux: `~/.config/claude-sdk/oauth_token.json`
+  - Windows: `%APPDATA%\claude-sdk\oauth_token.json`
+- **Permissions**: `0600` on Unix (owner read/write only)
+- **Contents**: Access token, refresh token, expiration timestamp
+
+```rust
+#[cfg(unix)]
+{
+    use std::os::unix::fs::PermissionsExt;
+    let perms = std::fs::Permissions::from_mode(0o600);
+    std::fs::set_permissions(&storage_path, perms)?;
+}
+```
+
+#### Token Handling
+
+- **Expiration buffer**: Tokens considered expired 60 seconds before actual expiry
+- **Auto-refresh**: Expired tokens trigger automatic refresh via refresh_token
+- **PKCE**: Authorization uses PKCE (SHA-256 challenge) to prevent code interception
+- **No secrets in logs**: Token values are truncated in display output
+
+#### Logout
+
+The `logout()` method deletes the cached token file entirely.
+
+**Location**: `src/auth/token.rs:172-213`, `src/auth/oauth.rs`
+
 ## Threat Model
 
 | Threat | Mitigation |
@@ -248,6 +283,8 @@ Subagents (via Task tool) share the parent session ID, so auto-bind works correc
 | Terminal corruption | Stderr isolation |
 | Memory unsafety | 100% safe Rust |
 | Session confusion/hijacking | Auto-bind on first Result, validation on send |
+| OAuth token theft | Restrictive file permissions (0600), PKCE for auth |
+| OAuth code interception | PKCE with SHA-256 challenge/verifier |
 
 ## Reporting Security Issues
 

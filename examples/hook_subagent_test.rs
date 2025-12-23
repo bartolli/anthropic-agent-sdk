@@ -187,6 +187,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             ])),
         },
         session_id: None,
+        uuid: None,
     };
 
     // Process the result - should trigger SubagentStop hook

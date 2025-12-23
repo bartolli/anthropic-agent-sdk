@@ -430,6 +430,7 @@ let options = ClaudeAgentOptions::builder()
 | `user` | `Option<String>` | `None` | User identifier |
 | `include_partial_messages` | `bool` | `false` | Include partial message events |
 | `fork_session` | `bool` | `false` | Fork session when resuming |
+| `session_id` | `Option<String>` | `None` | Custom session ID (must be valid UUID) |
 | `agents` | `Option<HashMap<String, AgentDefinition>>` | `None` | Custom agent definitions |
 | `setting_sources` | `Option<Vec<SettingSource>>` | `None` | Settings sources to load |
 | `max_budget_usd` | `Option<f64>` | `None` | Maximum budget in USD |
@@ -874,6 +875,87 @@ pub enum ContentValue {
 }
 ```
 
+### AskUserQuestion Tool Types
+
+Types for the `AskUserQuestion` tool which allows agents to ask users multiple-choice questions.
+
+#### `QuestionOption`
+
+```rust
+pub struct QuestionOption {
+    pub label: String,
+    pub description: String,
+}
+```
+
+| Field | Type | Description |
+| :---- | :--- | :---------- |
+| `label` | `String` | Display text for this option |
+| `description` | `String` | Explanation of what this option means |
+
+#### `QuestionSpec`
+
+```rust
+pub struct QuestionSpec {
+    pub question: String,
+    pub header: String,
+    pub options: Vec<QuestionOption>,
+    pub multi_select: bool,
+}
+```
+
+| Field | Type | Description |
+| :---- | :--- | :---------- |
+| `question` | `String` | The complete question to ask the user |
+| `header` | `String` | Short label displayed as a chip/tag (max 12 chars) |
+| `options` | `Vec<QuestionOption>` | Available choices (2-4 options) |
+| `multi_select` | `bool` | Whether multiple options can be selected |
+
+#### `AskUserQuestionInput`
+
+```rust
+pub struct AskUserQuestionInput {
+    pub questions: Vec<QuestionSpec>,
+    pub answers: Option<HashMap<String, String>>,
+}
+```
+
+| Field | Type | Description |
+| :---- | :--- | :---------- |
+| `questions` | `Vec<QuestionSpec>` | Questions to ask (1-4 questions) |
+| `answers` | `Option<HashMap<String, String>>` | User answers (populated in tool result) |
+
+#### `AskUserQuestionOutput`
+
+```rust
+pub struct AskUserQuestionOutput {
+    pub answers: HashMap<String, String>,
+}
+```
+
+| Field | Type | Description |
+| :---- | :--- | :---------- |
+| `answers` | `HashMap<String, String>` | User's answers keyed by question header |
+
+#### Example: Parsing Tool Input
+
+```rust
+use anthropic_agent_sdk::types::{AskUserQuestionInput, ContentBlock};
+
+// When you receive a ToolUse content block
+if let ContentBlock::ToolUse { name, input, .. } = block {
+    if name == "AskUserQuestion" {
+        let question_input: AskUserQuestionInput = serde_json::from_value(input)?;
+        for q in &question_input.questions {
+            println!("Q: {} (header: {})", q.question, q.header);
+            for opt in &q.options {
+                println!("  - {}: {}", opt.label, opt.description);
+            }
+        }
+    }
+}
+```
+
 ### `UserMessageContent`
 
 User message content wrapper.
@@ -1261,17 +1343,19 @@ pub struct BaseHookInput {
 | Hook Event | Input Type | Additional Fields |
 | :--------- | :--------- | :---------------- |
 | `PreToolUse` | `PreToolUseHookInput` | `tool_name`, `tool_input` |
-| `PostToolUse` | `PostToolUseHookInput` | `tool_name`, `tool_input`, `tool_response`, `tool_use_id` |
-| `PostToolUseFailure` | `PostToolUseFailureHookInput` | `tool_name`, `tool_input`, `tool_use_id`, `error`, `is_interrupt` |
+| `PostToolUse` | `PostToolUseHookInput` | `tool_name`, `tool_input`, `tool_response`, `tool_use_id?` |
+| `PostToolUseFailure` | `PostToolUseFailureHookInput` | `tool_name`, `tool_input`, `tool_use_id?`, `error`, `is_interrupt?` |
 | `SessionStart` | `SessionStartHookInput` | `source: SessionStartSource` |
 | `SessionEnd` | `SessionEndHookInput` | `reason: SessionEndReason` |
 | `SubagentStart` | `SubagentStartHookInput` | `agent_id`, `agent_type` |
-| `SubagentStop` | `SubagentStopHookInput` | `agent_id`, `agent_transcript_path`, `stop_hook_active` |
+| `SubagentStop` | `SubagentStopHookInput` | `agent_id?`, `agent_transcript_path?`, `stop_hook_active` |
 | `UserPromptSubmit` | `UserPromptSubmitHookInput` | `prompt` |
-| `Notification` | `NotificationHookInput` | `message`, `title` |
-| `PreCompact` | `PreCompactHookInput` | `trigger: CompactTrigger`, `custom_instructions` |
-| `PermissionRequest` | `PermissionRequestHookInput` | `tool_name`, `tool_input`, `permission_suggestions` |
+| `Notification` | `NotificationHookInput` | `message`, `title?` |
+| `PreCompact` | `PreCompactHookInput` | `trigger: CompactTrigger`, `custom_instructions?` |
+| `PermissionRequest` | `PermissionRequestHookInput` | `tool_name`, `tool_input`, `permission_suggestions?` |
 | `Stop` | `StopHookInput` | `stop_hook_active` |
+
+**Note:** Fields marked with `?` are optional (may be absent in CLI 2.0.75+).
 
 ### `SessionStartSource`
 
@@ -1967,6 +2051,206 @@ Allowed flags: `timeout`, `retries`, `log-level`, `cache-dir`
 Sessions are automatically bound on first Result message. See [Session Binding](#session-binding-secure-by-default).
 
 For full security documentation, see [SECURITY.md](SECURITY.md).
+
+---
+
+## OAuth Authentication
+
+The SDK provides OAuth 2.0 authentication with PKCE for Claude Max/Pro subscribers. This allows users to authenticate without API keys.
+
+### `OAuthClient`
+
+OAuth client for Claude authentication.
+
+```rust
+use anthropic_agent_sdk::auth::{OAuthClient, TokenStorage};
+
+#[tokio::main]
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    // Create OAuth client with default configuration
+    let client = OAuthClient::new()?;
+
+    // Authenticate - tries cached token first, then OAuth flow
+    let token = client.authenticate().await?;
+
+    println!("Access token: {}...", &token.access_token[..20]);
+    Ok(())
+}
+```
+
+#### Constructor
+
+```rust
+impl OAuthClient {
+    pub fn new() -> AuthResult<Self>
+    pub fn builder() -> OAuthClientBuilder
+}
+```
+
+#### Methods
+
+| Method | Returns | Description |
+| :----- | :------ | :---------- |
+| `authenticate()` | `AuthResult<TokenInfo>` | Try cached token, refresh, or start OAuth flow |
+| `start_oauth_flow()` | `AuthResult<TokenInfo>` | Start full OAuth authorization flow |
+| `config()` | `&OAuthConfig` | Get OAuth configuration |
+| `storage()` | `&TokenStorage` | Get token storage |
+| `logout()` | `AuthResult<()>` | Delete cached token |
+| `is_authenticated()` | `bool` | Check if valid token exists |
+| `current_token()` | `Option<TokenInfo>` | Get current token without refresh |
+
+### `OAuthClientBuilder`
+
+Builder for custom OAuth configuration.
+
+```rust
+let client = OAuthClient::builder()
+    .auto_open_browser(false)  // Disable auto browser open
+    .storage(TokenStorage::with_path("custom/path/token.json".into()))
+    .build();
+```
+
+| Method | Description |
+| :----- | :---------- |
+| `config(config)` | Set custom OAuth configuration |
+| `storage(storage)` | Set custom token storage |
+| `auto_open_browser(bool)` | Enable/disable automatic browser opening (default: true) |
+| `build()` | Build the OAuth client |
+
+### `OAuthConfig`
+
+OAuth endpoint configuration.
+
+```rust
+pub struct OAuthConfig {
+    pub client_id: String,
+    pub auth_url: String,
+    pub token_url: String,
+    pub redirect_uri: String,
+    pub scopes: String,
+}
+```
+
+Default configuration uses Claude Code's official OAuth endpoints.
+
+### `TokenInfo`
+
+OAuth token information.
+
+```rust
+pub struct TokenInfo {
+    pub access_token: String,
+    pub refresh_token: Option<String>,
+    pub token_type: String,
+    pub scope: Option<String>,
+    pub expires_at: Option<u64>,
+}
+```
+
+| Method | Returns | Description |
+| :----- | :------ | :---------- |
+| `is_expired()` | `bool` | Check if token is expired (with 60s buffer) |
+| `authorization_header()` | `String` | Get "Bearer {token}" header value |
+| `remaining_validity()` | `Option<Duration>` | Get remaining validity duration |
+
+### `TokenStorage`
+
+Persistent token storage.
+
+```rust
+use anthropic_agent_sdk::auth::TokenStorage;
+
+// Default path: platform-specific (macOS: ~/Library/Application Support/claude-sdk/)
+let storage = TokenStorage::new();
+
+// Custom path
+let storage = TokenStorage::with_path("/custom/path/token.json".into());
+
+// Operations
+let token = storage.load()?;        // Load token
+let token = storage.load_valid()?;  // Load only if not expired
+storage.save(&token)?;              // Save token
+storage.delete()?;                  // Delete token
+```
+
+| Method | Returns | Description |
+| :----- | :------ | :---------- |
+| `new()` | `Self` | Create with default path |
+| `with_path(path)` | `Self` | Create with custom path |
+| `path()` | `&PathBuf` | Get storage path |
+| `load()` | `Result<TokenInfo>` | Load token from storage |
+| `load_valid()` | `Result<TokenInfo>` | Load token only if not expired |
+| `save(token)` | `Result<()>` | Save token to storage |
+| `delete()` | `Result<()>` | Delete stored token |
+| `has_valid_token()` | `bool` | Check if valid token exists |
+
+### `OAuthError`
+
+Errors that can occur during OAuth operations.
+
+```rust
+pub enum OAuthError {
+    Http(String),
+    TokenExchange(String),
+    InvalidResponse(String),
+    Cancelled,
+    Storage(TokenError),
+    Io(std::io::Error),
+    Json(serde_json::Error),
+    BrowserOpen(String),
+    Reqwest(reqwest::Error),
+}
+```
+
+### `TokenError`
+
+Errors that can occur during token operations.
+
+```rust
+pub enum TokenError {
+    Expired,
+    NotFound,
+    Io(std::io::Error),
+    Json(serde_json::Error),
+}
+```
+
+### OAuth Flow
+
+1. Check for cached valid token
+2. If expired, attempt refresh using refresh token
+3. If no valid token, start browser-based OAuth flow with PKCE
+4. User authorizes in browser, copies authorization code
+5. Exchange code for access token
+6. Cache token for future use
+
+### Example: Full OAuth Flow
+
+```rust
+use anthropic_agent_sdk::auth::OAuthClient;
+
+#[tokio::main]
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    let client = OAuthClient::new()?;
+
+    // Check if already authenticated
+    if client.is_authenticated() {
+        let token = client.current_token().unwrap();
+        if let Some(remaining) = token.remaining_validity() {
+            println!("Token valid for: {:?}", remaining);
+        }
+    } else {
+        // Start OAuth flow
+        let token = client.authenticate().await?;
+        println!("Authenticated! Scopes: {:?}", token.scope);
+    }
+
+    // Log out when done
+    // client.logout()?;
+
+    Ok(())
+}
+```
 
 ---
 

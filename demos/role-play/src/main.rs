@@ -214,7 +214,8 @@ fn read_scene_state(demo_root: &Path) -> SceneState {
         .unwrap_or(1);
 
     let beat = std::fs::read_to_string(state_dir.join("beat.txt"))
-        .ok().map_or_else(|| "exposition".to_string(), |s| s.trim().to_string());
+        .ok()
+        .map_or_else(|| "exposition".to_string(), |s| s.trim().to_string());
 
     SceneState {
         tension,
@@ -889,7 +890,8 @@ fn handle_director_command(
             } else {
                 // Show current value
                 let current = std::fs::read_to_string(state_dir.join("beat.txt"))
-                    .ok().map_or_else(|| "exposition".to_string(), |s| s.trim().to_string());
+                    .ok()
+                    .map_or_else(|| "exposition".to_string(), |s| s.trim().to_string());
                 println!("{}", style(format!("Beat: {current}")).dim());
                 println!(
                     "{}",
@@ -1022,9 +1024,7 @@ async fn main() -> anyhow::Result<()> {
                 } else {
                     &args.name_a
                 };
-                format!(
-                    "{other_name} said: \"{prev}\"\n\nRespond naturally, staying in character."
-                )
+                format!("{other_name} said: \"{prev}\"\n\nRespond naturally, staying in character.")
             } else {
                 // Opening - first message
                 "Start the conversation. Introduce yourself and begin the dialogue.".to_string()

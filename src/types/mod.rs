@@ -51,7 +51,8 @@ pub use mcp::{
     SdkMcpServerConfig,
 };
 pub use messages::{
-    AssistantMessageContent, ContentBlock, ContentValue, Message, UserContent, UserMessageContent,
+    AskUserQuestionInput, AskUserQuestionOutput, AssistantMessageContent, ContentBlock,
+    ContentValue, Message, QuestionOption, QuestionSpec, UserContent, UserMessageContent,
 };
 pub use options::{
     AgentDefinition, ClaudeAgentOptions, ClaudeAgentOptionsBuilder, NetworkSandboxSettings,

@@ -208,10 +208,7 @@ mod server {
         println!("    {description}");
         if !params.is_empty() {
             print!("    Parameters: ");
-            let param_strs: Vec<_> = params
-                .iter()
-                .map(|(n, t)| format!("{n}: {t}"))
-                .collect();
+            let param_strs: Vec<_> = params.iter().map(|(n, t)| format!("{n}: {t}")).collect();
             println!("{}", param_strs.join(", "));
         }
         println!();

@@ -383,6 +383,11 @@ pub struct ClaudeAgentOptions {
     #[builder(default)]
     pub fork_session: bool,
 
+    /// Custom session ID (must be valid UUID)
+    /// Used with --resume or --continue and --fork-session
+    #[builder(default, setter(strip_option, into))]
+    pub session_id: Option<String>,
+
     /// Custom agent definitions
     #[builder(default, setter(strip_option))]
     pub agents: Option<HashMap<String, AgentDefinition>>,
@@ -425,6 +430,14 @@ pub struct ClaudeAgentOptions {
     /// Enforce strict MCP configuration validation
     #[builder(default)]
     pub strict_mcp_config: bool,
+
+    /// Enable file checkpointing for rewind support
+    ///
+    /// When enabled, tracks file changes made through Write/Edit/NotebookEdit tools,
+    /// allowing programmatic rewind via `rewind_files()`. Requires `--replay-user-messages`
+    /// to capture checkpoint UUIDs from user messages.
+    #[builder(default)]
+    pub enable_file_checkpointing: bool,
 
     /// Resume session at a specific message UUID
     #[builder(default, setter(strip_option, into))]
@@ -501,6 +514,7 @@ impl std::fmt::Debug for ClaudeAgentOptions {
             .field("user", &self.user)
             .field("include_partial_messages", &self.include_partial_messages)
             .field("fork_session", &self.fork_session)
+            .field("session_id", &self.session_id)
             .field("agents", &self.agents)
             .field("setting_sources", &self.setting_sources)
             // New fields for TypeScript SDK parity

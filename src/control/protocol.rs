@@ -167,6 +167,17 @@ pub enum ControlRequest {
         /// Maximum thinking tokens (null to disable)
         max_thinking_tokens: Option<u32>,
     },
+    /// Rewind files to a checkpoint
+    ///
+    /// Restores files to their state at the specified user message.
+    /// Requires `enable_file_checkpointing: true` in options.
+    #[serde(rename = "rewind_files")]
+    RewindFiles {
+        /// Unique request identifier
+        id: RequestId,
+        /// UUID of the user message checkpoint to rewind to
+        user_message_uuid: String,
+    },
 }
 
 /// Response from CLI to SDK
@@ -391,7 +402,8 @@ impl ProtocolHandler {
             | ControlRequest::PermissionResponse { id, .. }
             | ControlRequest::SetModel { id, .. }
             | ControlRequest::SetPermissionMode { id, .. }
-            | ControlRequest::SetMaxThinkingTokens { id, .. } => id.clone(),
+            | ControlRequest::SetMaxThinkingTokens { id, .. }
+            | ControlRequest::RewindFiles { id, .. } => id.clone(),
         }
     }
 
@@ -496,6 +508,22 @@ impl ProtocolHandler {
         ControlRequest::SetMaxThinkingTokens {
             id: self.next_id(),
             max_thinking_tokens,
+        }
+    }
+
+    /// Create a rewind files request
+    ///
+    /// Rewinds files to their state at the specified checkpoint.
+    /// The `user_message_uuid` comes from the `uuid` field on User messages
+    /// when `enable_file_checkpointing` is enabled.
+    #[must_use]
+    pub fn create_rewind_files_request(
+        &self,
+        user_message_uuid: impl Into<String>,
+    ) -> ControlRequest {
+        ControlRequest::RewindFiles {
+            id: self.next_id(),
+            user_message_uuid: user_message_uuid.into(),
         }
     }
 

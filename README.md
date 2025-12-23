@@ -7,7 +7,7 @@ Rust SDK for building AI agents powered by Claude Code. Mirrors the [TypeScript 
 **Prerequisites:**
 - Rust 1.85.0+ (edition 2024)
 - Node.js
-- Claude Code 2.0.60+: `npm install -g @anthropic-ai/claude-code`
+- Claude Code 2.0.75+: `npm install -g @anthropic-ai/claude-code`
 
 ```toml
 [dependencies]
@@ -62,12 +62,18 @@ cargo run --example runtime_setters_demo
 # Security
 cargo run --example security_demo
 
+# OAuth authentication
+cargo run --example oauth_demo
+cargo run --example oauth_demo -- status
+cargo run --example oauth_demo -- logout
+
+# Structured output
+cargo run --example structured_output_demo
+
 # MCP (requires --features rmcp for mcp_server)
 cargo run --example mcp_integration
 cargo run --example mcp_server --features rmcp
 ```
-
-See `CLAUDE.md` for the full list of 26 examples.
 
 ## TypeScript SDK Parity
 
@@ -133,6 +139,8 @@ See `CLAUDE.md` for the full list of 26 examples.
 | pathToClaudeCodeExecutable | ✓   | ✓       |
 | stderr            | ✓          | ✓        |
 | tools (preset)    | ✓          | ✓        |
+| enableFileCheckpointing | ✓    | ✓        |
+| sessionId         | ✓          | ✓        |
 
 ### MCP Server Types
 
@@ -172,6 +180,20 @@ The SDK implements strict security measures:
 - **100% safe Rust**: No unsafe code
 
 See [SECURITY.md](SECURITY.md) for full documentation.
+
+## OAuth Authentication
+
+For Claude Max/Pro subscribers, authenticate without API keys:
+
+```rust
+use anthropic_agent_sdk::auth::OAuthClient;
+
+let client = OAuthClient::new()?;
+let token = client.authenticate().await?;
+// Token is cached in platform-specific config directory
+```
+
+See `oauth_demo` example for full usage including status check and logout.
 
 ## Documentation
 

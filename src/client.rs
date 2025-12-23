@@ -633,8 +633,18 @@ impl ClaudeSDKClient {
                         "max_thinking_tokens": max_thinking_tokens
                     })
                 }
+                ControlRequest::RewindFiles {
+                    user_message_uuid, ..
+                } => {
+                    // Try snake_case format (CLI may use different format than TS SDK)
+                    serde_json::json!({
+                        "subtype": "rewind_files",
+                        "user_message_uuid": user_message_uuid
+                    })
+                }
                 _ => {
                     // Other control types not yet supported in stream-json mode
+                    tracing::debug!(request = ?request, "Skipping unsupported control request");
                     continue;
                 }
             };
@@ -647,12 +657,15 @@ impl ClaudeSDKClient {
             });
 
             if let Ok(json_str) = serde_json::to_string(&control_json) {
+                tracing::debug!(json = %json_str, "Sending control request to CLI");
                 let message_line = format!("{json_str}\n");
                 let mut transport_guard = transport.lock().await;
                 if transport_guard.write(&message_line).await.is_err() {
+                    tracing::error!("Failed to write control request to CLI");
                     break;
                 }
             } else {
+                tracing::error!("Failed to serialize control request");
                 break;
             }
         }
@@ -950,6 +963,52 @@ impl ClaudeSDKClient {
     pub async fn interrupt(&mut self) -> Result<()> {
         let protocol = self.protocol.lock().await;
         let request = protocol.create_interrupt_request();
+        drop(protocol);
+
+        self.control_tx
+            .send(request)
+            .map_err(|_| ClaudeError::transport("Control channel closed"))
+    }
+
+    /// Rewind files to a checkpoint
+    ///
+    /// Restores files to their state at the specified user message checkpoint.
+    /// Requires `enable_file_checkpointing: true` in options.
+    ///
+    /// # Arguments
+    /// * `user_message_uuid` - UUID from a User message's `uuid` field
+    ///
+    /// # Errors
+    /// Returns error if the rewind request cannot be sent
+    ///
+    /// # Example
+    /// ```rust,no_run
+    /// # use anthropic_agent_sdk::{ClaudeSDKClient, ClaudeAgentOptions, Message};
+    /// # async fn example() -> Result<(), Box<dyn std::error::Error>> {
+    /// let options = ClaudeAgentOptions::builder()
+    ///     .enable_file_checkpointing(true)
+    ///     .build();
+    /// let mut client = ClaudeSDKClient::new(options, None).await?;
+    ///
+    /// // Capture checkpoint UUID from user messages
+    /// let mut checkpoint_uuid: Option<String> = None;
+    /// while let Some(msg) = client.next_message().await {
+    ///     if let Message::User { uuid: Some(uuid), .. } = msg? {
+    ///         checkpoint_uuid = Some(uuid);
+    ///         break;
+    ///     }
+    /// }
+    ///
+    /// // Later, rewind to that checkpoint
+    /// if let Some(uuid) = checkpoint_uuid {
+    ///     client.rewind_files(&uuid).await?;
+    /// }
+    /// # Ok(())
+    /// # }
+    /// ```
+    pub async fn rewind_files(&mut self, user_message_uuid: &str) -> Result<()> {
+        let protocol = self.protocol.lock().await;
+        let request = protocol.create_rewind_files_request(user_message_uuid);
         drop(protocol);
 
         self.control_tx

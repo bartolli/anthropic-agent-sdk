@@ -222,10 +222,12 @@
 //! - `mcp_integration.rs` - Full E2E with Claude using MCP tools
 //! - `introspection_demo.rs` - Session info, models, commands, MCP status
 //! - `plan_mode_demo.rs` - Plan mode with approval workflow
+//! - `oauth_demo.rs` - OAuth authentication with PKCE
 //!
 //! Run examples with:
 //! ```bash
 //! cargo run --example simple_query
+//! cargo run --example oauth_demo
 //! cargo run --example mcp_server --features rmcp
 //! ```
 //!
@@ -288,6 +290,7 @@
 #![warn(missing_docs)]
 #![warn(clippy::all)]
 
+pub mod auth;
 pub mod callbacks;
 pub mod client;
 pub mod control;

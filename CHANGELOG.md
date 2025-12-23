@@ -5,6 +5,32 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.75] - 2025-12-22
+
+### Added
+- OAuth 2.0 authentication module with PKCE support for Claude Max/Pro subscribers
+- `OAuthClient` for browser-based authentication without API keys
+- `TokenStorage` for persistent token caching (platform-specific config directory)
+- `TokenInfo` with expiration tracking and auto-refresh support
+- `oauth_demo` example with status, logout, and help commands
+- File checkpointing support via `enable_file_checkpointing` option (CLI 2.0.75+) [experimental]
+- `uuid` field on `Message::User` for message tracking
+- `RewindFiles` control request for checkpoint restoration [experimental]
+- `rewind_files()` method on `ClaudeSDKClient` [experimental]
+- `checkpointing_demo` and `checkpointing_rewind_test` examples [experimental]
+- Hook input types: `PreCompactHookInput`, `CompactTrigger`, `PermissionRequestHookInput`
+- `resume_session_at` option for resuming at specific message UUID
+
+### Changed
+- Token exchange uses JSON body format (not form-urlencoded) per Anthropic API
+- Hook input types now use `Option<String>` for `tool_use_id` field (CLI 2.0.75+)
+
+### Dependencies
+- Added `sha2` 0.10.9 for PKCE challenge generation
+- Added `base64` 0.22.1 for base64url encoding
+- Added `reqwest` 0.12.28 for HTTP requests
+- Added `dirs` 6.0.0 for config directory resolution
+
 ## [0.2.67] - 2025-12-12
 
 ### Added

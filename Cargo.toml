@@ -4,11 +4,11 @@ resolver = "2"
 
 [workspace.dependencies]
 # SDK - workspace members use this; path for dev, version for publish
-anthropic-agent-sdk = { version = "0.2.67", path = "." }
+anthropic-agent-sdk = { version = "0.2.75", path = "." }
 
 [package]
 name = "anthropic-agent-sdk"
-version = "0.2.67"
+version = "0.2.75"
 edition = "2024"
 authors = ["Angel Bartolli <bartolli@gmail.com>"]
 description = "Rust SDK for Claude Code CLI - streaming queries, hooks, permissions, and MCP integration"
@@ -33,9 +33,6 @@ tokio-util = { version = "0.7.17", features = ["codec", "rt"] }
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
 
-# HTTP client (for future MCP HTTP support)
-# reqwest = { version = "0.12.24", features = ["json", "stream"], optional = true }
-
 # Official Anthropic MCP SDK (optional - for SDK MCP servers)
 rmcp = { version = "0.12.0", optional = true, features = ["server", "client", "transport-io", "transport-child-process", "transport-streamable-http-server", "transport-worker", "macros"] }
 
@@ -53,11 +50,17 @@ async-trait = "0.1"
 # Process utilities
 which = "8.0.0"
 
+# Directory utilities (for config paths)
+dirs = "6.0.0"
+
 # Tracing (always available - zero cost when no subscriber attached)
 tracing = "0.1.44"
 
 # Optional dependencies
 schemars = { version = "1.1.0", optional = true }
+sha2 = "0.10.9"
+base64 = "0.22.1"
+reqwest = { version = "0.12.28", features = ["json"] }
 
 [dev-dependencies]
 anyhow = "1.0"
@@ -147,3 +150,7 @@ required-features = ["rmcp"]
 [[example]]
 name = "mcp_integration"
 path = "examples/mcp_integration.rs"
+
+[[example]]
+name = "oauth_demo"
+path = "examples/oauth_demo.rs"

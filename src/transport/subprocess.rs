@@ -304,6 +304,11 @@ impl SubprocessTransport {
             cmd.arg("--fork-session");
         }
 
+        // Custom session ID
+        if let Some(ref session_id) = self.options.session_id {
+            cmd.arg("--session-id").arg(session_id);
+        }
+
         // Agents
         if let Some(ref agents) = self.options.agents {
             let agents_json = serde_json::to_string(agents).unwrap_or_default();
@@ -418,7 +423,7 @@ impl SubprocessTransport {
             for plugin in plugins {
                 match plugin {
                     crate::types::SdkPluginConfig::Local { path } => {
-                        cmd.arg("--plugin").arg(path);
+                        cmd.arg("--plugin-dir").arg(path);
                     }
                 }
             }
@@ -437,6 +442,12 @@ impl SubprocessTransport {
         // Strict MCP config validation
         if self.options.strict_mcp_config {
             cmd.arg("--strict-mcp-config");
+        }
+
+        // File checkpointing for rewind support
+        // Enabled via environment variable, not CLI flag
+        if self.options.enable_file_checkpointing {
+            cmd.env("CLAUDE_CODE_ENABLE_SDK_FILE_CHECKPOINTING", "1");
         }
 
         // Resume session at specific message UUID
@@ -1022,5 +1033,77 @@ mod tests {
 
         // Cleanup
         transport.close().await.ok();
+    }
+
+    #[test]
+    fn test_session_id_option_maps_to_cli_arg() {
+        let Ok(cli_path) = SubprocessTransport::find_cli() else {
+            return; // Skip if CLI not installed
+        };
+
+        let options = ClaudeAgentOptions::builder()
+            .session_id("550e8400-e29b-41d4-a716-446655440000")
+            .build();
+
+        let transport = SubprocessTransport::new(PromptInput::Stream, options, Some(cli_path))
+            .expect("Transport creation should succeed");
+
+        let cmd = transport
+            .build_command()
+            .expect("build_command should succeed");
+        // Convert tokio Command to std Command to access get_args()
+        let std_cmd = cmd.as_std();
+        let args: Vec<String> = std_cmd
+            .get_args()
+            .filter_map(|a| a.to_str().map(String::from))
+            .collect();
+
+        // Find --session-id flag
+        let session_id_idx = args.iter().position(|a| a == "--session-id");
+        assert!(
+            session_id_idx.is_some(),
+            "Expected --session-id flag in args"
+        );
+
+        // Verify the value follows the flag
+        let value = &args[session_id_idx.unwrap() + 1];
+        assert_eq!(value, "550e8400-e29b-41d4-a716-446655440000");
+    }
+
+    #[test]
+    fn test_plugin_dir_flag_correct() {
+        let Ok(cli_path) = SubprocessTransport::find_cli() else {
+            return; // Skip if CLI not installed
+        };
+
+        let options = ClaudeAgentOptions::builder()
+            .plugins(vec![crate::types::SdkPluginConfig::Local {
+                path: "/path/to/plugin".to_string(),
+            }])
+            .build();
+
+        let transport = SubprocessTransport::new(PromptInput::Stream, options, Some(cli_path))
+            .expect("Transport creation should succeed");
+
+        let cmd = transport
+            .build_command()
+            .expect("build_command should succeed");
+        // Convert tokio Command to std Command to access get_args()
+        let std_cmd = cmd.as_std();
+        let args: Vec<String> = std_cmd
+            .get_args()
+            .filter_map(|a| a.to_str().map(String::from))
+            .collect();
+
+        // Should use --plugin-dir, not --plugin
+        let plugin_dir_idx = args.iter().position(|a| a == "--plugin-dir");
+        assert!(
+            plugin_dir_idx.is_some(),
+            "Expected --plugin-dir flag in args, got: {args:?}"
+        );
+
+        // Verify the value follows the flag
+        let value = &args[plugin_dir_idx.unwrap() + 1];
+        assert_eq!(value, "/path/to/plugin");
     }
 }
